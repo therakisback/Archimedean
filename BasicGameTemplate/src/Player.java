@@ -5,16 +5,18 @@ import util.Vector3f;
 public class Player extends GameObject {
 
     private final float GRAVITY_RATE = 8;
-	 private final float JUMP_SPEED = 8;
-	 private final float MOVE_SPEED = 4;
-	 private final int JUMP_TIME = 60;
-	 private final int ATTACK_SPEED = 10;
+    private final float JUMP_SPEED = 8;
+    private final float MOVE_SPEED = 4;
+    private final float[] BREAK_POINTS = {0f, 10f, 20f, 30f, 40f, 50f, 60f, 70f, 80f, 90f};
+    private final int JUMP_TIME = 60;
+    private final int ATTACK_SPEED = 10;
 
-     private int facing = -1;
-	 private int pAttackCooldown = 0;
-	 private int airtime = 0;
-     private boolean onGround = false;
-	 private boolean jumpReset = true;
+    private float experience = 0;
+    private int facing = -1;
+    private int pAttackCooldown = 0;
+    private int airtime = 0;
+    private boolean onGround = false;
+    private boolean jumpReset = true;
 
 
     public Player() {
@@ -72,6 +74,14 @@ public class Player extends GameObject {
         Vector3f movement = new Vector3f(facing * ATTACK_SPEED, 0, 0);
         return new Attack("res/Bullet.png", 32, 32, spawn, movement, 120, true);
     
+    }
+
+    public int level(float xp) {
+        experience += xp;
+        for (int i = BREAK_POINTS.length; i > 0; i++) {
+            if (experience >= BREAK_POINTS[i]) return i;
+        }
+        return 0;
     }
     
 }

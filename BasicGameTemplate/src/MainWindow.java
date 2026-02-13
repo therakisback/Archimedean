@@ -51,7 +51,7 @@ public class MainWindow {
 	 private static   Viewer canvas = new  Viewer(gameworld);
 	 private KeyListener Controller =new Controller(); 
 	 private MouseListener Mouse =new Mouse();
-	 private static   int TargetFPS = 60;
+	 private static   int TargetFPS = 30;
 	 private static boolean startGame= false; 
 	 private   JLabel BackgroundImageForStartMenu;
 	  

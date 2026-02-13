@@ -38,7 +38,6 @@ public class Model {
 	// Player variables
 	
 	private Player player;
-	private Vector3f playerVelocity = new Vector3f(0, 0, 0);
 	private int pCooldown = 0;
 
 	// Enemy variables
@@ -153,7 +152,7 @@ public class Model {
 			// Out of Bounds
 			if (temp.getCentre().getX() == 0.0) BulletList.remove(temp);
 			// TODO Inconsitent if screen shape is changed
-			if (temp.getCentre().getX() >= 968) BulletList.remove(temp);
+			if (temp.getCentre().getX() >= 930) BulletList.remove(temp);
 			// Collision with platforms
 			for (GameObject plat : PlatformList) {
 				Vector3f collisionVector = collisionDetector(plat, temp);
@@ -173,6 +172,8 @@ public class Model {
 		   the model listening, so the movement methods more just feed calculated info
 		   to Model, where it is all combined and finalized
 		 */ 
+		Vector3f playerVelocity = new Vector3f();
+
 		if(Controller.getInstance().isKeyAPressed())
 		{
 			playerVelocity.Plus(player.moveLeft());
