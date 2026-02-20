@@ -21,8 +21,9 @@ public class Enemy extends GameObject {
     private float acceleration;
     private float damage;
     private float attackCooldown = 0;
+    private float health;
     private int airtime = 0;
-    private int enemyType = 0;  
+    private int enemyType = 0; 
     private boolean onGround;
     private Random random = new Random();
 
@@ -40,6 +41,7 @@ public class Enemy extends GameObject {
                 damage = 1;
                 moveSpeed = 4;
                 acceleration = .1f;
+                health = 1;
                 break;
             }
         }
@@ -99,4 +101,10 @@ public class Enemy extends GameObject {
     public void isOnGround() {onGround = true;}
 
     public void bonk() {if (airtime > GRAVITYRATE) airtime = (int) GRAVITYRATE;}
+
+    public int getEnemyType() {return enemyType;}
+
+    public float damage(float dealt) {health -= damage;return health;}
+
+    public float hp() {return health;}
 }

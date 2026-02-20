@@ -1,8 +1,4 @@
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import util.GameObject;
 import util.Point3f;
 import util.Vector3f; 
@@ -36,33 +32,28 @@ public class Model {
 	private final int PLAYER_ATTACK_DELAY = 15;
 	
 	// Player variables
-	
-	private Player player;
+	private final Player player = Player.getPlayer();;
 	private int pCooldown = 0;
+	private int pLevel = 0;
 
 	// Enemy variables
-	private  CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<Enemy>();
+	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
 	private float difficulty = .01f;
 	private int mobCap = (int)(difficulty * 100f);
 
-	private Controller controller = Controller.getInstance();
-	private Mouse mouse = Mouse.getInstance();
+	// Controllers
+	private final Controller controller = Controller.getInstance();
+	private final Mouse mouse = Mouse.getInstance();
 
-	
-	private  CopyOnWriteArrayList<Attack> BulletList  = new CopyOnWriteArrayList<Attack>();
-	private  CopyOnWriteArrayList<GameObject> PlatformList = new CopyOnWriteArrayList<GameObject>();
-	private int Score=0; 
+	// World variables
+	private final  CopyOnWriteArrayList<Attack> BulletList  = new CopyOnWriteArrayList<>();
+	private final CopyOnWriteArrayList<GameObject> PlatformList = new CopyOnWriteArrayList<>();
 
 	public Model() {
 		 //setup game world 
-		//Player - I have no idea why this is capitalized at base but it annoyed me to no end. Its an object not a class, use camel case as is standard.
-		player = new Player();
-		
 		PlatformList.add(new GameObject("res/blankSprite.png", 1000, 50, new Point3f(0, 900, 0)));
-		PlatformList.add(new GameObject("res/blankSprite.png", 200, 50, new Point3f(200, 730, 0)));
-		
-	    
+		PlatformList.add(new GameObject("res/blankSprite.png", 200, 50, new Point3f(200, 730, 0))); 
 	}
 	
 	// This is the heart of the game , where the model takes in all the inputs ,decides the outcomes and then changes the model accordingly. 
@@ -80,24 +71,17 @@ public class Model {
 	}
 
 	private void gameLogic() { 
-		
-		
-		// this is a way to increment across the array list data structure 
-
-		
-		//see if they hit anything 
-		// using enhanced for-loop style as it makes it alot easier both code wise and reading wise too 
-		// TODO Implement this into the Attack Class?
-		for (Enemy temp : EnemiesList) 
-		{
-			for (Attack Bullet : BulletList) 
-			{
-				if ( Math.abs(temp.getCentre().getX()- Bullet.getCentre().getX())< temp.getWidth() 
-					&& Math.abs(temp.getCentre().getY()- Bullet.getCentre().getY()) < temp.getHeight())
-				{
-					EnemiesList.remove(temp);
-					BulletList.remove(Bullet);
-					Score++;
+		// Enemy hitting
+		for (Enemy enemy : EnemiesList) {
+			for (Attack bullet : BulletList) {
+				if (collisionDetector(enemy, bullet).length() != 0 && bullet.isPlayerMade()) {
+					enemy.damage(bullet.getDamage());
+					if (enemy.hp() <= 0) EnemiesList.remove(enemy);
+					BulletList.remove(bullet);
+					int currentLevel = player.level(enemy.getEnemyType());
+					if ( currentLevel != pLevel) {
+						levelUp(currentLevel);
+					}
 				}  
 			}
 		}
@@ -117,8 +101,6 @@ public class Model {
 	}
 
 	private void enemyLogic() {
-		// TODO Auto-generated method stub
-
 		// Add credits per frame and spawn new enemies.
 		mobCap = (int)(difficulty * 100f);
 		if (credits < mobCap * 3) credits += difficulty;
@@ -159,7 +141,7 @@ public class Model {
 				if (collisionVector.length() != 0) {
 					BulletList.remove(temp);
 				}
-		}
+			}
 		} 
 		
 	}
@@ -196,6 +178,18 @@ public class Model {
 
 		if(!controller.isKeyWPressed()) {
 			playerVelocity.Plus(player.fall());
+		}
+
+		if(controller.isKeyQPressed()) {
+			// TODO Implement first ability functionality
+		}
+
+		if (controller.isKeyEPressed()) {
+			// TODO Implement second ability func
+		}
+
+		if (controller.isKeyRPressed()) {
+			// TODO implement third ability func
 		}
 
 		if(mouse.isLMBPressed()) {
@@ -243,6 +237,23 @@ public class Model {
 		}
 	}
 
+	private void levelUp(int level) {
+		pLevel = level;
+		switch (level) {
+			case 1: player.passive(1);break;
+			case 2: player.active(1);break;
+			case 3: player.passive(2);break;
+			case 4: player.passive(3);break;
+			case 5: player.passive(4);break;
+			case 6: player.active(2);break;
+			case 7: player.passive(5);break;
+			case 8: player.passive(6);break;
+			case 9: player.passive(7);break;
+			case 10: player.active(3);break;
+			default: System.out.println("Illegal level called.");break;
+		}
+	}
+
 	public GameObject getPlayer() {
 		return player;
 	}
@@ -258,11 +269,6 @@ public class Model {
 	public CopyOnWriteArrayList<GameObject> getPlatforms() {
 		return PlatformList;
 	}
-
-	public int getScore() { 
-		return Score;
-	}
- 
 
 }
 

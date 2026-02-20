@@ -183,9 +183,6 @@ public class Viewer extends JPanel {
 			e.printStackTrace();
 		}
 	}
-		 
-	 
-
 }
 
 
