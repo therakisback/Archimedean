@@ -32,6 +32,7 @@ public class Controller implements KeyListener {
 	private static boolean KeyAPressed= false;
 	private static boolean KeyDPressed= false;
 	private static boolean KeyWPressed= false;
+	private static boolean KeySPressed= false;
 	private static boolean KeyQPressed= false;
 	private static boolean KeyEPressed= false;
 	private static boolean KeyRPressed= false;
@@ -48,8 +49,7 @@ public class Controller implements KeyListener {
 	@Override
 	// Key pressed , will keep triggering 
 	public void keyTyped(KeyEvent e) {}
-
-	// TODO need to implement extra listening for active abilities
+	
 	@Override
 	public void keyPressed(KeyEvent e) 
 	{ 
@@ -58,6 +58,7 @@ public class Controller implements KeyListener {
 			case 'a':setKeyAPressed(true);break;  
 			case 'w':setKeyWPressed(true);break;
 			case 'd':setKeyDPressed(true);break;
+			case 's':setKeySPressed(true);break;
 			case 'q':setKeySpacePressed(true);break; 
 			case 'e':setKeySpacePressed(true);break;  
 			case 'r':setKeySpacePressed(true);break;
@@ -99,6 +100,10 @@ public class Controller implements KeyListener {
 
 	public boolean isKeyWPressed() {return KeyWPressed;}
 	public void setKeyWPressed(boolean keyWPressed) {KeyWPressed = keyWPressed;}
+
+
+	public boolean isKeySPressed() {return KeySPressed;}
+	public void setKeySPressed(boolean keySPressed) {KeySPressed = keySPressed;}
 
 
 	public boolean isKeySpacePressed() {return KeySpacePressed;}

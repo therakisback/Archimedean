@@ -33,20 +33,15 @@ public class Point3f {
 	private float z;
 	
 	private int boundary=935;
-	
-	
-	// default constructor
-	public Point3f() { 
-		setX(0.0f);
-		setY(0.0f);
-		setZ(0.0f);
-	}
-	
-	//initializing constructor
+
 	public Point3f(float x, float y, float z) { 
-		this.setX(x);
-		this.setY(y);
-		this.setZ(z); 
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	public Point3f() { 
+		this(0f, 0f, 0f);
 	}
 	
 	private void setBoundary(int boundary) {
@@ -59,13 +54,14 @@ public class Point3f {
 	{
 		switch(postion)
 		{
-		case 0: return getX();
-		case 1: return getY();
-		case 2: return getZ(); 
-		default: return Float.NaN;  
+			case 0: return getX();
+			case 1: return getY();
+			case 2: return getZ(); 
+			default: return Float.NaN;  
 		} 
 	}
 	
+	@Override
 	public String toString()
 	{
 		return ("(" + getX() +"," + getY() +"," + getZ() +")");
