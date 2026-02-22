@@ -1,16 +1,25 @@
+import java.util.List;
 import java.util.Random;
+import util.GameIO;
 import util.GameObject;
 import util.Point3f;
 import util.Vector3f;
 
+/**
+ * This class holds the vast majority of the player characters information, as such this class is mostly variables
+ * and data. The class is also a singleton, I doubt and hope player will not be called anywhere other than
+ * model, but it being singleton is just an insurance, as this is a singleplayer game and accidentally
+ * creating two players would cause disconnects and take up a lot of memory.
+ */
 public class Player extends GameObject {
 
-    private static Player player = new Player();
+    private static final Player player = new Player();
     // Constants
     private final float GRAVITY_RATE = 8;
     private final float JUMP_SPEED = 8;
     private final float[] BREAK_POINTS = {0f, 10f, 20f, 30f, 40f, 50f, 60f, 70f, 80f, 90f};
     private final int JUMP_TIME = 60;
+    private final GameIO io = GameIO.getInstance();
     // Attacks
     Random diceGen = new Random();
     private float damage = 1f;
@@ -21,7 +30,6 @@ public class Player extends GameObject {
     private int playerWidth = 50;
     private int playerHeight = 50;
     private boolean hasDiceUpgrade = false;
-    private boolean hasUkeleleUpgrade = false;
     // Player stats
     private int firstAbility = 0;
     private int secondAbility = 0;
@@ -36,7 +44,6 @@ public class Player extends GameObject {
     private boolean onGround = false;
     private boolean jumpReset = true;
     // Cooldowns
-    private int pAttackCooldown = 0;
     private int airtime = 0;
 
     private Player() {
@@ -97,10 +104,10 @@ public class Player extends GameObject {
         Vector3f movement = new Vector3f(facing * attackSpeed, 0, 0);
         if(hasDiceUpgrade) {
             // If the player hase 'Dice' we randomize the damage :)
-            return new Attack("res/Bullet.png", 32, 32, spawn, movement, 
+            return new Attack("res/Bullet.png", attackWidth, attackHeight, spawn, movement, 
                                 attackDuration, true, rtd());
         } else {
-            return new Attack("res/Bullet.png", 32, 32, spawn, movement, 
+            return new Attack("res/Bullet.png", attackWidth, attackHeight, spawn, movement, 
                                 attackDuration, true, damage);
         } 
         
@@ -109,7 +116,7 @@ public class Player extends GameObject {
 
     // --- Levelling ---
     public int level(float xp) {
-        experience += xp;
+        experience += xp * xpMult;
         for (int i = BREAK_POINTS.length-1; i > 0; i--) {
             if (experience >= BREAK_POINTS[i]) return i;
         }
@@ -127,8 +134,28 @@ public class Player extends GameObject {
         else hp += amount;
     }
 
+    public void flight(){
+
+    }
+
     public void passive(int passiveID) {
-        // TODO implement passive id selection and levelling
+        // Dice upgrade is special, more of these would be annoying to implement
+        if (passiveID == 8) hasDiceUpgrade = true;
+        List<Integer> mods = io.passiveModifiers(passiveID);
+        moveSpeed *= mods.get(0);
+        damage *= mods.get(1);
+        attackSpeed *= mods.get(2);
+        playerWidth *= mods.get(3);
+        playerHeight *= mods.get(4);
+        attackWidth *= mods.get(5);
+        attackHeight *= mods.get(6);
+        attackDuration *= mods.get(7);
+        xpMult *= mods.get(8);
+        maxHealth += mods.get(9);
+        // Apply changes now
+        hp = maxHealth;
+        this.setWidth(playerWidth);
+        this.setHeight(playerHeight);
     }
 
     public void active(int activeID) {
@@ -140,7 +167,7 @@ public class Player extends GameObject {
     public void isOnGround(boolean val) {onGround = val;}
 
     public float getDamage() {return damage;}
-
+    public float attackSpeed() {return attackSpeed;}
     
     
 }

@@ -29,7 +29,6 @@ SOFTWARE.
 public class Model {
 
 	private final float FRICTION = 2;
-	private final int PLAYER_ATTACK_DELAY = 15;
 	
 	// Player variables
 	private final Player player = Player.getPlayer();;
@@ -195,8 +194,7 @@ public class Model {
 		if(mouse.isLMBPressed()) {
 			if (pCooldown == 0) {
 				BulletList.add(player.fire());
-				pCooldown = PLAYER_ATTACK_DELAY;
-
+				pCooldown =  (int) (60 / player.attackSpeed());
 			}
 		}
 		if (pCooldown > 0) pCooldown--;
