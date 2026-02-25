@@ -10,7 +10,7 @@ import util.Vector3f;
 public class Enemy extends GameObject {
 
     private final float GRAVITYRATE = 8;
-	private final int JUMPTIME = 30;
+	private final int JUMPTIME = 40;
     private final float ATTACKDELAY = 5;
 
     Vector3f movement = new Vector3f();
@@ -51,7 +51,7 @@ public class Enemy extends GameObject {
      * Does one frame of movement / calculation for an enemy
      * @return amount of damage to be dealt to the player/
      */
-    public float step() {
+    public void step() {
         switch(enemyType) {
             default: {
                 // Movement
@@ -77,20 +77,14 @@ public class Enemy extends GameObject {
                 // Gravity && jumping (easier if seperated)
                 jump(movement);
                 this.centre.ApplyVector(movement);
-
-                // Damage if player and enemy are (roughly) touching
-                if (target.distance(this.centre) < width/2 || target.distance(this.centre) < height/2 && attackCooldown <= 0.1) {
-                    attackCooldown = ATTACKDELAY;
-                    return damage;
-                } else return 0;
+                }
             }
         }
-    }
 
     private void jump(Vector3f movementVector) {
         // Moving up
         if (airtime > 0) {
-            float momentum = Math.min(1f, (airtime/GRAVITYRATE));
+            float momentum = Math.min(1f, (airtime/(GRAVITYRATE * 2)));
 			movementVector.setY(GRAVITYRATE * momentum);
             airtime--;
         } else if (movement.getY() > -GRAVITYRATE) {
