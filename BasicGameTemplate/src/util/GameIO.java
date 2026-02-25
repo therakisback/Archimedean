@@ -16,11 +16,14 @@ public class GameIO {
     private static final GameIO instance = new GameIO();
 
     private List<Integer> passiveIDs = new ArrayList<>();
+    private HashMap<Integer, String> passiveTitles = new HashMap<>();
     private HashMap<Integer, String> passiveDescriptions = new HashMap<>();
-    private HashMap<Integer, List<Integer>> passiveModifiers = new HashMap<>();
+    private HashMap<Integer, List<Float>> passiveModifiers = new HashMap<>();
     private List<Integer> activeIDs = new ArrayList<>();
+    private HashMap<Integer, String> activeTitles = new HashMap<>();
     private HashMap<Integer, String> activeDescriptions = new HashMap<>();
     private HashMap<Character, List<Integer>> activeIDsByKey = new HashMap<>();
+    private HashMap<Integer, Character> activeKeys = new HashMap<>();
 
     /**
      * Class that is meant to handle the file IO of the game.
@@ -46,11 +49,12 @@ public class GameIO {
                     String[] data = line.split(", "); // Unfortunately when I wrote the csv I did comma + space between data points, I'd rather just change it here.
                     Integer id = Integer.valueOf(data[0]);
                     passiveIDs.add(id);
-                    passiveDescriptions.put(id, data[1]);
+                    passiveTitles.put(id,data[1]);
+                    passiveDescriptions.put(id, data[2]);
                     
-                    List<Integer> modList = new ArrayList<>();
-                    for (int i = 2; i < data.length; i++) {
-                        modList.add(Integer.valueOf(data[i]));
+                    List<Float> modList = new ArrayList<>();
+                    for (int i = 3; i < data.length; i++) {
+                        modList.add(Float.valueOf(data[i]));
                     }
                     passiveModifiers.put(id, modList);
                 }
@@ -62,8 +66,10 @@ public class GameIO {
                     String[] data = line.split(", ");
                     Integer id = Integer.valueOf(data[0]);
                     activeIDs.add(id);
-                    activeDescriptions.put(id,data[1]);
-                    activeIDsByKey.get(data[3].charAt(0)).add(id);
+                    activeTitles.put(id, data[1]);
+                    activeDescriptions.put(id,data[2]);
+                    activeIDsByKey.get(data[4].charAt(0)).add(id);
+                    activeKeys.put(id, data[4].charAt(0));
                 }
             }
         } catch (IOException e) {
@@ -73,14 +79,26 @@ public class GameIO {
 
     public static GameIO getInstance() {return instance;}
 
+    // Passives
+
     public List<Integer> getPassiveIDs() {return passiveIDs;} 
+
+    public String getPassiveTitle(int ID) {return passiveTitles.get(ID);}
+
+    public String getPassiveDescription(int ID) {return passiveDescriptions.get(ID);}
+
+    public List<Float> getPassiveModifiers(int ID) {return passiveModifiers.get(ID);}
+
+    // Actives
+
+    public Character getKeyByID(int ID) {return activeKeys.get(ID);}
+
     public List<Integer> getActiveIDs() {return activeIDs;}
+
+    public String getActiveTitle(int ID) {return activeTitles.get(ID);}
+
+    public String getActiveDescrition(int ID) {return activeDescriptions.get(ID);}
+
     public List<Integer> getActiveIDsByKey(Character key) {return activeIDsByKey.get(key);}
 
-    public String abilityDescription(int ID, boolean isActiveAbility) {
-        if (isActiveAbility) return activeDescriptions.get(ID);
-        else return passiveDescriptions.get(ID);
-    }
-
-    public List<Integer> passiveModifiers(int ID) {return passiveModifiers.get(ID);}
 }

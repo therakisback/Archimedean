@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import util.GameObject;
 import util.Point3f;
@@ -31,7 +32,8 @@ public class Model {
 	private final float FRICTION = 2;
 	
 	// Player variables
-	private final Player player = Player.getPlayer();;
+	private final Player player = Player.getPlayer();
+	private int pIFrames = 0;
 	private int pCooldown = 0;
 	private int pLevel = 0;
 
@@ -82,6 +84,15 @@ public class Model {
 						levelUp(currentLevel);
 					}
 				}  
+			}
+			// Player enemy collision
+			if (collisionDetector(enemy, player).length() != 0) {
+				// I-Frames have to be managed in Model so that they can be decremented every frame.
+				if (pIFrames == 0) {
+					if (player.damage(enemy.getDamage()) <= 0.1f) MainWindow.lose();
+					pIFrames = player.getIFrames();
+					System.out.println("Player damaged! HP remaining: " + player.damage(0));
+				}
 			}
 		}
 
@@ -197,6 +208,7 @@ public class Model {
 				pCooldown =  (int) (60 / player.attackSpeed());
 			}
 		}
+		if (pIFrames > 0) pIFrames--;
 		if (pCooldown > 0) pCooldown--;
 		// Apply Velocity
 		player.getCentre().ApplyVector(playerVelocity);
@@ -238,16 +250,26 @@ public class Model {
 	private void levelUp(int level) {
 		pLevel = level;
 		switch (level) {
-			case 1: player.passive(1);break;
-			case 2: player.active(1);break;
-			case 3: player.passive(2);break;
-			case 4: player.passive(3);break;
-			case 5: player.passive(4);break;
-			case 6: player.active(2);break;
-			case 7: player.passive(5);break;
-			case 8: player.passive(6);break;
-			case 9: player.passive(7);break;
-			case 10: player.active(3);break;
+			case 1: 
+			case 3: 
+			case 4: 
+			case 5: 
+			case 7: 
+			case 8: 
+			case 9: {
+				// TODO make passiveID chosen by player
+				int passiveID = new Random().nextInt();
+				player.passive(passiveID);
+				break;
+			}
+			case 2: 
+			case 6: 
+			case 10: {
+				// TODO make activeID chosen by player
+				int activeID = new Random().nextInt();
+				player.active(activeID);
+				break;
+			}
 			default: System.out.println("Illegal level called.");break;
 		}
 	}

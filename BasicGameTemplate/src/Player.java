@@ -18,7 +18,7 @@ public class Player extends GameObject {
     private final float GRAVITY_RATE = 8;
     private final float JUMP_SPEED = 8;
     private final float[] BREAK_POINTS = {0f, 10f, 20f, 30f, 40f, 50f, 60f, 70f, 80f, 90f};
-    private final int JUMP_TIME = 60;
+    private final int JUMP_TIME = 30;
     private final GameIO io = GameIO.getInstance();
     // Attacks
     Random diceGen = new Random();
@@ -29,6 +29,7 @@ public class Player extends GameObject {
     private int attackSpeed = 10;
     private int playerWidth = 50;
     private int playerHeight = 50;
+    private int iFrames = 30;    // TODO could be modified by upgrades
     private boolean hasDiceUpgrade = false;
     // Player stats
     private int firstAbility = 0;
@@ -36,8 +37,8 @@ public class Player extends GameObject {
     private int thirdAbility = 0;
     private float xpMult = 1f;
     private float experience = 0;
-    private int maxHealth = 4;
-    private int hp = maxHealth; 
+    private float maxHealth = 4;
+    private float hp = maxHealth; 
     // Movement
     private float moveSpeed = 4;
     private int facing = -1;
@@ -59,16 +60,16 @@ public class Player extends GameObject {
     public Vector3f jump() {
         Vector3f velocity = new Vector3f(0, -GRAVITY_RATE, 0);
         if (onGround && jumpReset) {
-				velocity.setY(JUMP_SPEED);
-				onGround = false;
-				jumpReset = false;
-				airtime = JUMP_TIME;
-			} else if (airtime > 0) {
-				// Momentum is used here to allow a jump to be high without being insanely fast
-				// It essentially delays and dampens gravity while the player holds w
-				float momentum = Math.min(1f, (airtime/JUMP_SPEED));
-				velocity.setY(JUMP_SPEED * momentum);
-			}
+            velocity.setY(JUMP_SPEED);
+            onGround = false;
+            jumpReset = false;
+            airtime = JUMP_TIME;
+		} else if (airtime > 0) {
+            // Momentum is used here to allow a jump to be high without being insanely fast
+            // It essentially delays and dampens gravity while the player holds w
+            float momentum = Math.min(1f, (airtime/(JUMP_SPEED * 2)));
+            velocity.setY(JUMP_SPEED * momentum);
+	    }
         if (airtime > 0) airtime--;
         return velocity;
     }
@@ -110,8 +111,6 @@ public class Player extends GameObject {
             return new Attack("res/Bullet.png", attackWidth, attackHeight, spawn, movement, 
                                 attackDuration, true, damage);
         } 
-        
-    
     }
 
     // --- Levelling ---
@@ -130,8 +129,10 @@ public class Player extends GameObject {
     }
         // Actives
     public void heal(int amount) {
-        if (amount >= maxHealth-hp) hp = maxHealth;
-        else hp += amount;
+        if (firstAbility == 2) {
+            if (amount >= maxHealth-hp) hp = maxHealth;
+            else hp += amount;
+        }
     }
 
     public void flight(){
@@ -141,7 +142,7 @@ public class Player extends GameObject {
     public void passive(int passiveID) {
         // Dice upgrade is special, more of these would be annoying to implement
         if (passiveID == 8) hasDiceUpgrade = true;
-        List<Integer> mods = io.passiveModifiers(passiveID);
+        List<Float> mods = io.getPassiveModifiers(passiveID);
         moveSpeed *= mods.get(0);
         damage *= mods.get(1);
         attackSpeed *= mods.get(2);
@@ -151,7 +152,7 @@ public class Player extends GameObject {
         attackHeight *= mods.get(6);
         attackDuration *= mods.get(7);
         xpMult *= mods.get(8);
-        maxHealth += mods.get(9);
+        maxHealth *= mods.get(9);
         // Apply changes now
         hp = maxHealth;
         this.setWidth(playerWidth);
@@ -160,14 +161,26 @@ public class Player extends GameObject {
 
     public void active(int activeID) {
         // TODO Unsure if active level-up is necessary here but we will see.
+        switch(io.getKeyByID(activeID)) {
+            case 'q': {firstAbility = activeID;}
+            case 'e': {secondAbility = activeID;}
+            case 'r': {thirdAbility = activeID;}
+            default: {}
+        }
     }
+
+    // --- Getters & Setters
+
 
     public void isOnGround() {onGround = true;}
 
     public void isOnGround(boolean val) {onGround = val;}
 
     public float getDamage() {return damage;}
+
+    public float damage(float dealt) {hp -= dealt;return hp;}
+
+    public int getIFrames() {return iFrames;}
+
     public float attackSpeed() {return attackSpeed;}
-    
-    
 }

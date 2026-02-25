@@ -51,9 +51,10 @@ public class MainWindow {
 	 private static   Viewer canvas = new  Viewer(gameworld);
 	 private KeyListener Controller =new Controller(); 
 	 private MouseListener Mouse =new Mouse();
-	 private static   int TargetFPS = 30;
+	 private static   int TargetFPS = 60;
 	 private static boolean startGame= false; 
 	 private   JLabel BackgroundImageForStartMenu;
+	 private static boolean playing = true;
 	  
 	public MainWindow() {
 	        frame.setSize(1000, 1000);  // you can customise this later and adapt it to change on size.  
@@ -98,7 +99,7 @@ public class MainWindow {
 
 	public static void main(String[] args) {
 		MainWindow hello = new MainWindow();  //sets up environment 
-		while(true)   //not nice but remember we do just want to keep looping till the end.  // this could be replaced by a thread but again we want to keep things simple 
+		while(playing)   //not nice but remember we do just want to keep looping till the end.  // this could be replaced by a thread but again we want to keep things simple 
 		{ 
 			//swing has timer class to help us time this but I'm writing my own, you can of course use the timer, but I want to set FPS and display it 
 			
@@ -118,6 +119,8 @@ public class MainWindow {
 		 UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TargetFPS); 
 			  
 		}
+
+		// TODO Implement win / loss screen
 		
 		
 	} 
@@ -140,6 +143,10 @@ public class MainWindow {
 		
 		 
 	}
+
+	public static void win() {playing = false;}
+
+	public static void lose() {playing = false;}
 
 }
 

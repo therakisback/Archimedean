@@ -104,6 +104,8 @@ public class Enemy extends GameObject {
 
     public int getEnemyType() {return enemyType;}
 
+    public float getDamage() {return damage;}
+
     public float damage(float dealt) {health -= damage;return health;}
 
     public float hp() {return health;}
