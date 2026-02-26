@@ -44,25 +44,24 @@ SOFTWARE.
  */ 
 
 public class MainWindow {
-	 private static JFrame frame = new JFrame("Game");   // Change to the name of your game 
-	 private static Model gameworld= new Model();
-	 private static Viewer canvas = new  Viewer(gameworld);
-	 private Controller controller = Controller.getInstance();
-	 private Mouse mouse = Mouse.getInstance();
-	 private static int TargetFPS = 60;
+	 private static final JFrame frame = new JFrame("Game");   // Change to the name of your game 
+	 private static final Model gameworld= new Model();
+	 private static final Viewer canvas = new Viewer(gameworld);
+	 private KeyListener controller = Controller.getInstance();
+	 private MouseListener mouse = Mouse.getInstance();
+	 private static final int TARGET_FPS = 60;
 	 private static boolean startGame= false; 
 	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
 	  
 	public MainWindow() {
-	        frame.setSize(1000, 1000);  // you can customise this later and adapt it to change on size.  
-	      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   //If exit // you can modify with your way of quitting , just is a template.
+	        frame.setSize(1024, 1024);  // you can customise this later and adapt it to change on size.  
+	      	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   //If exit // you can modify with your way of quitting , just is a template.
 	        frame.setLayout(null);
 	        frame.add(canvas);  
-	        canvas.setBounds(0, 0, 1000, 1000); 
-			   canvas.setBackground(new Color(255,255,255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen 
-		      canvas.setVisible(false);   // this will become visible after you press the key. 
-		          
+	        canvas.setBounds(0, 0, 1024, 1024); 
+			canvas.setBackground(new Color(255,255,255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen 
+		    canvas.setVisible(false);   // this will become visible after you press the key. 
 		       
 	        JButton startMenuButton = new JButton("Start Game");  // start button 
 	        startMenuButton.addActionListener(new ActionListener()
@@ -76,70 +75,48 @@ public class MainWindow {
 					canvas.addMouseListener(mouse); 
 	            canvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
 					startGame=true;
-				}});  
+				}
+			});  
+		
 	        startMenuButton.setBounds(400, 500, 200, 40); 
 	        
 	        //loading background image 
 	        File BackroundToLoad = new File("res/startscreen.png");  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
 			try {
-				 
-				 BufferedImage myPicture = ImageIO.read(BackroundToLoad);
-				 BackgroundImageForStartMenu = new JLabel(new ImageIcon(myPicture));
-				 BackgroundImageForStartMenu.setBounds(0, 0, 1000, 1000);
+				BufferedImage myPicture = ImageIO.read(BackroundToLoad);
+				BackgroundImageForStartMenu = new JLabel(new ImageIcon(myPicture));
+				BackgroundImageForStartMenu.setBounds(0, 0, 1000, 1000);
 				frame.add(BackgroundImageForStartMenu); 
 			}  catch (IOException e) { 
 				e.printStackTrace();
 			}   
 			 
-	         frame.add(startMenuButton);  
-	       frame.setVisible(true);   
+	        frame.add(startMenuButton);  
+	        frame.setVisible(true);   
 	}
 
 	public static void main(String[] args) {
 		MainWindow hello = new MainWindow();  //sets up environment 
-		while(playing)   //not nice but remember we do just want to keep looping till the end.  // this could be replaced by a thread but again we want to keep things simple 
-		{ 
-			//swing has timer class to help us time this but I'm writing my own, you can of course use the timer, but I want to set FPS and display it 
-			
-			int TimeBetweenFrames =  1000 / TargetFPS;
+		while(playing) { 
+			int TimeBetweenFrames =  1000 / TARGET_FPS;
 			long FrameCheck = System.currentTimeMillis() + (long) TimeBetweenFrames; 
 			
-			//wait till next time step 
 		 while (FrameCheck > System.currentTimeMillis()){} 
-			
-			
-			if(startGame)
-				 {
+			if(startGame) {
 				 gameloop();
 				 }
-			
-			//UNIT test to see if framerate matches 
-		 UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TargetFPS); 
-			  
+
+		 UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TARGET_FPS);  
 		}
 
 		// TODO Implement win / loss screen
-		
-		
+	
 	} 
 	//Basic Model-View-Controller pattern 
 	private static void gameloop() { 
-		// GAMELOOP  
-		
-		// controller input  will happen on its own thread 
-		// So no need to call it explicitly 
-		
-		// model update   
 		gameworld.gamelogic();
-		// view update 
-		
-		  canvas.updateview(); 
-		
-		// Both these calls could be setup as  a thread but we want to simplify the game logic for you.  
-		//score update  
-		 frame.setTitle("Ever wonder why it's called 'Risk of Rain' when there is no rain?"); 
-		
-		 
+		canvas.updateview();  
+		frame.setTitle("Ever wonder why it's called 'Risk of Rain' when there is no rain?");  
 	}
 
 	public static void win() {playing = false;}

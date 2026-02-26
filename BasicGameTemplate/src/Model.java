@@ -50,6 +50,7 @@ public class Model {
 	// World variables
 	private final  CopyOnWriteArrayList<Attack> BulletList  = new CopyOnWriteArrayList<>();
 	private final CopyOnWriteArrayList<Platform> PlatformList = new CopyOnWriteArrayList<>();
+	private String background;
 
 	public Model() {
 		//setup game world 
@@ -274,6 +275,8 @@ public class Model {
 	}
 
 	private void stageOne() {
+		background = "res/environment/ss_background_layered.png";
+
 		PlatformList.clear();
 		int position = 0;
 		PlatformList.add(new Platform(1, new Point3f(0, 900, 0)));
@@ -289,21 +292,15 @@ public class Model {
 		PlatformList.add(new Platform(0, new Point3f(position, 800, 0))); 
 	}
 
-	public GameObject getPlayer() {
-		return player;
-	}
+	public GameObject getPlayer() {return player;}
 
-	public CopyOnWriteArrayList<Enemy> getEnemies() {
-		return EnemiesList;
-	}
+	public CopyOnWriteArrayList<Enemy> getEnemies() {return EnemiesList;}
 	
-	public CopyOnWriteArrayList<Attack> getBullets() {
-		return BulletList;
-	}
+	public CopyOnWriteArrayList<Attack> getBullets() {return BulletList;}
 
-	public CopyOnWriteArrayList<Platform> getPlatforms() {
-		return PlatformList;
-	}
+	public CopyOnWriteArrayList<Platform> getPlatforms() {return PlatformList;}
+
+	public String getBackground() {return background;}
 
 }
 
