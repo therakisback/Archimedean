@@ -40,7 +40,7 @@ public class Model {
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
-	private float difficulty = .01f;
+	private float difficulty = .00f;
 	private int mobCap = (int)(difficulty * 100f);
 
 	// Controllers
@@ -49,13 +49,12 @@ public class Model {
 
 	// World variables
 	private final  CopyOnWriteArrayList<Attack> BulletList  = new CopyOnWriteArrayList<>();
-	private final CopyOnWriteArrayList<GameObject> PlatformList = new CopyOnWriteArrayList<>();
+	private final CopyOnWriteArrayList<Platform> PlatformList = new CopyOnWriteArrayList<>();
 
 	public Model() {
-		 //setup game world 
-		PlatformList.add(new GameObject("res/blankSprite.png", 1000, 50, new Point3f(0, 900, 0)));
-		PlatformList.add(new GameObject("res/blankSprite.png", 200, 50, new Point3f(200, 730, 0))); 
-	}
+		//setup game world 
+		stageOne();
+}
 	
 	// This is the heart of the game , where the model takes in all the inputs ,decides the outcomes and then changes the model accordingly. 
 	public void gamelogic() 
@@ -235,9 +234,9 @@ public class Model {
 		if (distance.getY() >= 0) {yVio = Math.abs(distance.getY())-obj1.getHeight();}
 		else {yVio = Math.abs(distance.getY()) - obj2.getHeight();}
 
-		if (yVio < 0 && xVio < 0) {
+		if (yVio < 0f && xVio < 0f) {
 			// We want to push the player in the direction of the nearest edge. with a preference for moving up.
-			if (yVio >= xVio) {
+			if (yVio >= xVio-4) {
 				return new Vector3f(0, yVio * direction.getY(), 0);
 			} else {	// No idea why direction needs to be inverted for only X.
 				return new Vector3f(xVio * -direction.getX(), 0, 0);
@@ -274,6 +273,22 @@ public class Model {
 		}
 	}
 
+	private void stageOne() {
+		PlatformList.clear();
+		int position = 0;
+		PlatformList.add(new Platform(1, new Point3f(0, 900, 0)));
+		position += PlatformList.get(0).getWidth();
+		PlatformList.add(new Platform(2, new Point3f(position, 900, 0)));
+		position += PlatformList.get(1).getWidth();
+		PlatformList.add(new Platform(3, new Point3f(position, 900, 0)));
+		position  = PlatformList.get(0).getWidth();
+		PlatformList.add(new Platform(0, new Point3f(position, 800, 0)));
+		position  = PlatformList.get(3).getWidth(); 
+		PlatformList.add(new Platform(0, new Point3f(position, 800, 0)));
+		position  = PlatformList.get(4).getWidth(); 
+		PlatformList.add(new Platform(0, new Point3f(position, 800, 0))); 
+	}
+
 	public GameObject getPlayer() {
 		return player;
 	}
@@ -286,7 +301,7 @@ public class Model {
 		return BulletList;
 	}
 
-	public CopyOnWriteArrayList<GameObject> getPlatforms() {
+	public CopyOnWriteArrayList<Platform> getPlatforms() {
 		return PlatformList;
 	}
 

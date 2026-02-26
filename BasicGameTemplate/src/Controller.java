@@ -38,12 +38,13 @@ public class Controller implements KeyListener {
 	private static boolean KeyRPressed= false;
 	private static boolean KeySpacePressed= false;
 
-	private static final Controller instance = new Controller();
+	private static Controller instance;
 
-	public Controller() {}
+	private Controller() {}
 	 
 	public static Controller getInstance(){
-	        return instance;
+	    if (instance == null) instance = new Controller();    
+		return instance;
 	}
 	   
 	@Override

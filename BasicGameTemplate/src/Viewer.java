@@ -102,7 +102,7 @@ public class Viewer extends JPanel {
 		//Draw Platforms
 		gameworld.getPlatforms().forEach((temp) ->
 		{
-			drawPlatforms((int) temp.getCentre().getX(), (int) temp.getCentre().getY(), (int) temp.getWidth(), (int) temp.getHeight(), temp.getTexture(),g);
+			drawPlatforms(temp, g);
 		});
 	}
 	
@@ -171,12 +171,13 @@ public class Viewer extends JPanel {
 		
 	}
 
-	private void drawPlatforms(int x, int y, int width, int height, String texture,Graphics g) {
-		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
+	private void drawPlatforms(Platform p, Graphics g) {
+		File TextureToLoad = new File(p.getTexture());  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
 		try {
 			Image myImage = ImageIO.read(TextureToLoad); 
-			//64 by 128 
-			 g.drawImage(myImage, x,y, x+width, y+height, 0 , 0, 31, 31, null); 
+			int x = (int) p.getCentre().getX();
+			int y = (int) p.getCentre().getY();
+			g.drawImage(myImage, x,y, x+p.getWidth(), y+p.getHeight(), 0 , 0, p.spriteWidth, p.spriteHeight, null); 
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

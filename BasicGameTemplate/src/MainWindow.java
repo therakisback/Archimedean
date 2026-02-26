@@ -43,17 +43,15 @@ SOFTWARE.
    (MIT LICENSE ) e.g do what you want with this :-) 
  */ 
 
-
-
 public class MainWindow {
-	 private static  JFrame frame = new JFrame("Game");   // Change to the name of your game 
-	 private static   Model gameworld= new Model();
-	 private static   Viewer canvas = new  Viewer(gameworld);
-	 private KeyListener Controller =new Controller(); 
-	 private MouseListener Mouse =new Mouse();
-	 private static   int TargetFPS = 60;
+	 private static JFrame frame = new JFrame("Game");   // Change to the name of your game 
+	 private static Model gameworld= new Model();
+	 private static Viewer canvas = new  Viewer(gameworld);
+	 private Controller controller = Controller.getInstance();
+	 private Mouse mouse = Mouse.getInstance();
+	 private static int TargetFPS = 60;
 	 private static boolean startGame= false; 
-	 private   JLabel BackgroundImageForStartMenu;
+	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
 	  
 	public MainWindow() {
@@ -74,8 +72,8 @@ public class MainWindow {
 					startMenuButton.setVisible(false);
 					BackgroundImageForStartMenu.setVisible(false); 
 					canvas.setVisible(true); 
-					canvas.addKeyListener(Controller);    //adding the controller to the Canvas 
-					canvas.addMouseListener(Mouse); 
+					canvas.addKeyListener(controller);    //adding the controller to the Canvas 
+					canvas.addMouseListener(mouse); 
 	            canvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
 					startGame=true;
 				}});  
