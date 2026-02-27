@@ -21,6 +21,10 @@ public class Player extends GameObject {
     private final float[] BREAK_POINTS = {0f, 10f, 20f, 30f, 40f, 50f, 60f, 70f, 80f, 90f};
     private final int JUMP_TIME = 30;
     private final GameIO io = GameIO.getInstance();
+    // Animations
+    private int frames = 12;
+    private int verticalFrame = 0;
+    private int horizontalFrame = 0;
     // Attacks
     Random diceGen = new Random();
     private float damage = 1f;
@@ -49,7 +53,7 @@ public class Player extends GameObject {
     private int airtime = 0;
 
     private Player() {
-        super("res/Lightning.png",50,50,new Point3f(500,800,0));
+        super("res/player/Elementals_leaf_ranger_288x128_SpriteSheet.png",100,100,new Point3f(500,800,0));
     }
 
     public static Player getPlayer() {
@@ -137,7 +141,7 @@ public class Player extends GameObject {
     }
 
     public void flight(){
-
+        // TODO Implement passives
     }
 
     public void passive(int passiveID) {
@@ -170,6 +174,16 @@ public class Player extends GameObject {
         }
     }
 
+    // --- Animations ---
+    public void stepAnimation() {
+        horizontalFrame++;
+        horizontalFrame = horizontalFrame % frames;
+    }
+
+    public void changeAnimation() {
+
+    }
+
     // --- Getters & Setters
 
 
@@ -184,4 +198,8 @@ public class Player extends GameObject {
     public int getIFrames() {return iFrames;}
 
     public float attackSpeed() {return attackSpeed;}
+
+    public int getVerticalFrame() {return verticalFrame;}
+
+    public int getHorizontalFrame() {return horizontalFrame;}
 }

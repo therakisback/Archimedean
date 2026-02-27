@@ -73,7 +73,7 @@ public class MainWindow {
 					canvas.setVisible(true); 
 					canvas.addKeyListener(controller);    //adding the controller to the Canvas 
 					canvas.addMouseListener(mouse); 
-	            canvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
+	            	canvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
 					startGame=true;
 				}
 			});  

@@ -10,7 +10,7 @@ import util.Vector3f;
  */ 
 public class Enemy extends GameObject {
 
-    private final float GRAVITYRATE = 8;
+    private final float GRAVITYRATE = 4;
 	private final int JUMPTIME = 40;
     private final float ATTACKDELAY = 5;
 
@@ -59,7 +59,7 @@ public class Enemy extends GameObject {
                 target = player.getCentre();
                 if (target.distance(this.centre) > moveSpeed) {
                     // If player is above enemy, jump
-                    if (target.getY() < this.centre.getY()) {
+                    if (target.getY() + player.getHeight() < this.centre.getY()) {
                         if (onGround) {
                             airtime = JUMPTIME;
                             onGround = false; 

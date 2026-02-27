@@ -3,6 +3,7 @@ import java.awt.Image;
 import java.awt.LayoutManager;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
@@ -37,9 +38,23 @@ public class Viewer extends JPanel {
 	private long currentAnimationTime= 0; 
 	
 	Model gameworld; 
+	private Image playerSprites;
+	private Image background;
+	private HashMap<String, Image> objectSprites = new HashMap<>();
+	private HashMap<String, Image> enemySprites = new HashMap<>();
 	 
 	public Viewer(Model World) {
 		this.gameworld=World;
+		// I don't know why we loaded the textures every frame, its a huge hit to performance.
+		File playerTexture = new File(gameworld.getPlayer().getTexture()); 
+		File bgTexture = new File(gameworld.getBackground());
+		try {
+			playerSprites = ImageIO.read(playerTexture); 
+			background = ImageIO.read(bgTexture);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
 	}
 
 	public Viewer(LayoutManager layout) {
@@ -58,23 +73,13 @@ public class Viewer extends JPanel {
 		this.repaint();
 	}
 	
+	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		currentAnimationTime++; // runs animation time step 
 		
-		
-		//Draw player Game Object 
-		int x = (int) gameworld.getPlayer().getCentre().getX();
-		int y = (int) gameworld.getPlayer().getCentre().getY();
-		int width = (int) gameworld.getPlayer().getWidth();
-		int height = (int) gameworld.getPlayer().getHeight();
-		String texture = gameworld.getPlayer().getTexture();
-		
 		//Draw background 
-		drawBackground(gameworld.getBackground(), g);
-		
-		//Draw player
-		drawPlayer(x, y, width, height, texture,g);
+		drawBackground(g);
 		  
 		//Draw Bullets 
 		// change back 
@@ -86,7 +91,7 @@ public class Viewer extends JPanel {
 		//Draw Enemies   
 		gameworld.getEnemies().forEach((temp) -> 
 		{
-			drawEnemies((int) temp.getCentre().getX(), (int) temp.getCentre().getY(), (int) temp.getWidth(), (int) temp.getHeight(), temp.getTexture(),g);	 
+			drawEnemies(temp,g);	 
 		 
 	    });
 		
@@ -95,40 +100,45 @@ public class Viewer extends JPanel {
 		{
 			drawPlatforms(temp, g);
 		});
+
+		gameworld.getDecorations().forEach((temp) ->
+		{ 
+			drawPlatforms(temp, g);
+		});
+
+		//Draw player
+		drawPlayer(gameworld.getPlayer() ,g);
 	}
 	
-	private void drawEnemies(int x, int y, int width, int height, String texture, Graphics g) {
-		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
-		try {
-			Image myImage = ImageIO.read(TextureToLoad);
-			//The spirte is 32x32 pixel wide and 4 of them are placed together so we need to grab a different one each time 
-			//remember your training :-) computer science everything starts at 0 so 32 pixels gets us to 31  
-			int currentPositionInAnimation= ((int) (currentAnimationTime%4 )*32); //slows down animation so every 10 frames we get another frame so every 100ms 
-			g.drawImage(myImage, x,y, x+width, y+height, currentPositionInAnimation  , 0, currentPositionInAnimation+31, 32, null); 
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
+	private void drawEnemies(Enemy e, Graphics g) {
+		// Load sprites and keep them in memory so we arent constantly rereading the file and image.
+		if (!enemySprites.containsKey(e.getTexture())) {
+			File eSprite = new File(e.getTexture());
+			try {
+				enemySprites.put(e.getTexture(), ImageIO.read(eSprite));
+			} catch (IOException err) {
+				err.printStackTrace();
+			} 
+		}
+
+		// Now Draw
+		int currentPositionInAnimation= ((int) (currentAnimationTime%4 )*32); //slows down animation so every 10 frames we get another frame so every 100ms 
+		int x = (int) e.getCentre().getX();
+		int y = (int) e.getCentre().getY();
+		g.drawImage(enemySprites.get(e.getTexture()), x, y, x+e.getWidth(), y+e.getHeight(), currentPositionInAnimation  , 0, currentPositionInAnimation+31, 32, null); 
+
+
 	}
 
-	private void drawBackground(String texture, Graphics g)
+	private void drawBackground(Graphics g)
 	{
-		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
-		try {
-			Image myImage = ImageIO.read(TextureToLoad); 
-			 g.drawImage(myImage, 0,0, 1000, 1000, 0 , 0, 180, 180, null); 
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		g.drawImage(background, 0,0, 1000, 1000, 0 , 0, 180, 180, null); 
 	}
 	
 	private void drawBullet(int x, int y, int width, int height, String texture,Graphics g)
 	{
-		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
+		// TODO Move to constructor after adding new sprites
+		File TextureToLoad = new File(texture);  
 		try {
 			Image myImage = ImageIO.read(TextureToLoad); 
 			//64 by 128 
@@ -141,37 +151,27 @@ public class Viewer extends JPanel {
 	}
 	
 
-	private void drawPlayer(int x, int y, int width, int height, String texture,Graphics g) { 
-		File TextureToLoad = new File(texture);  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
-		try {
-			Image myImage = ImageIO.read(TextureToLoad); 
-			int currentPositionInAnimation= ((int) ((currentAnimationTime%40)/10))*32; //slows down animation so every 10 frames we get another frame so every 100ms 
-			g.drawImage(myImage, x,y, x+width, y+height, currentPositionInAnimation  , 0, currentPositionInAnimation+31, 32, null); 
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		 
-		//g.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, observer));
-		//Lighnting Png from https://opengameart.org/content/animated-spaceships  its 32x32 thats why I know to increament by 32 each time 
-		// Bullets from https://opengameart.org/forumtopic/tatermands-art 
-		// background image from https://www.needpix.com/photo/download/677346/space-stars-nebula-background-galaxy-universe-free-pictures-free-photos-free-images
-		
+	private void drawPlayer(Player p, Graphics g) { 
+		if (currentAnimationTime % 4 == 0) p.stepAnimation();
+		int xAnim = p.getHorizontalFrame() * 288 + 117; 
+		int yAnim = p.getVerticalFrame() * 128 + 77;
+		int x = (int) p.getCentre().getX();
+		int y = (int) p.getCentre().getY();
+		g.drawImage(playerSprites, x, y, x+p.getWidth(), y+p.getHeight(), xAnim, yAnim, xAnim+60, yAnim+50, null); 
 	}
 
-	private void drawPlatforms(Platform p, Graphics g) {
-		File TextureToLoad = new File(p.getTexture());  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
-		try {
-			Image myImage = ImageIO.read(TextureToLoad); 
-			int x = (int) p.getCentre().getX();
-			int y = (int) p.getCentre().getY();
-			g.drawImage(myImage, x,y, x+p.getWidth(), y+p.getHeight(), 0 , 0, p.spriteWidth, p.spriteHeight, null); 
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	private void drawPlatforms(PhysicalGameObject p, Graphics g) {
+		// Load sprites and keep them in memory so we arent constantly rereading the file and image.
+		if (!objectSprites.containsKey(p.getTexture())) {
+			File TextureToLoad = new File(p.getTexture());  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
+			try {
+				objectSprites.put(p.getTexture(), ImageIO.read(TextureToLoad));
+			} catch (IOException e) {e.printStackTrace();}
 		}
+		// Now Draw
+		int x = (int) p.getCentre().getX();
+		int y = (int) p.getCentre().getY();
+		g.drawImage(objectSprites.get(p.getTexture()), x,y, x+p.getWidth(), y+p.getHeight(), 0 , 0, p.spriteWidth, p.spriteHeight, null);	
 	}
 }
 

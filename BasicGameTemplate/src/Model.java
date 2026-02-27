@@ -40,7 +40,7 @@ public class Model {
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
-	private float difficulty = .00f;
+	private float difficulty = .01f;
 	private int mobCap = (int)(difficulty * 100f);
 
 	// Controllers
@@ -49,7 +49,8 @@ public class Model {
 
 	// World variables
 	private final  CopyOnWriteArrayList<Attack> BulletList  = new CopyOnWriteArrayList<>();
-	private final CopyOnWriteArrayList<Platform> PlatformList = new CopyOnWriteArrayList<>();
+	private final CopyOnWriteArrayList<PhysicalGameObject> PlatformList = new CopyOnWriteArrayList<>();
+	private final CopyOnWriteArrayList<PhysicalGameObject> DecorationList = new CopyOnWriteArrayList<>();
 	private String background;
 
 	public Model() {
@@ -279,26 +280,31 @@ public class Model {
 
 		PlatformList.clear();
 		int position = 0;
-		PlatformList.add(new Platform(1, new Point3f(0, 900, 0)));
+		PlatformList.add(new PhysicalGameObject(2, new Point3f(0, 936, 0)));
 		position += PlatformList.get(0).getWidth();
-		PlatformList.add(new Platform(2, new Point3f(position, 900, 0)));
+		PlatformList.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
 		position += PlatformList.get(1).getWidth();
-		PlatformList.add(new Platform(3, new Point3f(position, 900, 0)));
+		PlatformList.add(new PhysicalGameObject(1, new Point3f(position, 936, 0)));
 		position  = PlatformList.get(0).getWidth();
-		PlatformList.add(new Platform(0, new Point3f(position, 800, 0)));
-		position  = PlatformList.get(3).getWidth(); 
-		PlatformList.add(new Platform(0, new Point3f(position, 800, 0)));
-		position  = PlatformList.get(4).getWidth(); 
-		PlatformList.add(new Platform(0, new Point3f(position, 800, 0))); 
+		PlatformList.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += PlatformList.get(3).getWidth(); 
+		PlatformList.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += PlatformList.get(4).getWidth(); 
+		PlatformList.add(new PhysicalGameObject(0, new Point3f(position, 808, 0))); 
+
+		DecorationList.clear();
+		DecorationList.add(new PhysicalGameObject(4, new Point3f(600,1024-64-(144*4),0)));
 	}
 
-	public GameObject getPlayer() {return player;}
+	public Player getPlayer() {return player;}
 
 	public CopyOnWriteArrayList<Enemy> getEnemies() {return EnemiesList;}
 	
 	public CopyOnWriteArrayList<Attack> getBullets() {return BulletList;}
 
-	public CopyOnWriteArrayList<Platform> getPlatforms() {return PlatformList;}
+	public CopyOnWriteArrayList<PhysicalGameObject> getPlatforms() {return PlatformList;}
+
+	public CopyOnWriteArrayList<PhysicalGameObject> getDecorations() {return DecorationList;}
 
 	public String getBackground() {return background;}
 
