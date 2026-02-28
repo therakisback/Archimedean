@@ -1,7 +1,6 @@
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import util.GameObject;
-import util.Point3f;
 import util.Vector3f; 
 /*
  * Created by Abraham Campbell on 15/01/2020.
@@ -40,7 +39,7 @@ public class Model {
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
-	private float difficulty = .00f;
+	private float difficulty = .01f;
 	private int mobCap = (int)(difficulty * 100f);
 
 	// Controllers
@@ -55,8 +54,7 @@ public class Model {
 	private boolean gameOver = false;
 
 	public Model() {
-		//setup game world 
-		stageOne();
+		// TODO setup game world
 }
 	
 	// This is the heart of the game , where the model takes in all the inputs ,decides the outcomes and then changes the model accordingly. 
@@ -159,7 +157,6 @@ public class Model {
 		 */ 
 		Vector3f playerVelocity = new Vector3f();
 		boolean falling = true;
-		player.changeAnimation(0);
 
 		if(Controller.getInstance().isKeyWPressed())
 		{
@@ -177,7 +174,7 @@ public class Model {
 			Vector3f collisionVector = collisionDetector(plat, player);
 			player.getCentre().ApplyVector(collisionVector);
 			if (collisionVector.getY() > 0) {
-				player.isOnGround();
+				player.isOnGround(true);
 				falling = false;
 			} else if (collisionVector.getY() < 0) player.bonk();
 		}
@@ -188,13 +185,17 @@ public class Model {
 		playerVelocity = new Vector3f();
 
 		
-		if(mouse.isLMBPressed()) {
+		if(mouse.isLMBPressed() && player.isOnGround()) {
 			if (pCooldown == 0 && !falling) {
+				System.out.println("shoot");
 				BulletList.add(player.fire());
 				pCooldown =  (int) (60 / player.attackSpeed());
 			}
-			player.changeAnimation(4);
+			if (!falling) player.changeAnimation(4);
 		} 
+		else if (pCooldown > 0) {
+			if (!falling) player.changeAnimation(4);
+		}
 		else if(Controller.getInstance().isKeyAPressed()) {
 			playerVelocity.Plus(player.moveLeft());
 			if (!falling) player.changeAnimation(1);
@@ -202,6 +203,10 @@ public class Model {
 		else if(Controller.getInstance().isKeyDPressed()) {
 			playerVelocity.Plus(player.moveRight());
 			if (!falling) player.changeAnimation(1);
+		} 
+		else if (!falling && player.isOnGround()) {
+			// If we aren't jumping, falling, moving, shooting, we idle
+			player.changeAnimation(0);
 		}
 
 		if(controller.isKeyQPressed()) {
@@ -217,6 +222,7 @@ public class Model {
 		}
 
 		player.getCentre().ApplyVector(playerVelocity);
+		if (!falling && playerVelocity.getX() == 0f) 
 
 		// Damage takes priority for animations, so its last
 		if (player.damage(0) <= 0.0) {
@@ -224,9 +230,8 @@ public class Model {
 			return;
 		}
 
-
-		if (pIFrames > 0) pIFrames--;
 		if (pCooldown > 0) pCooldown--;
+		if (pIFrames > 0) pIFrames--;
 	}
 
 	/**
@@ -289,26 +294,7 @@ public class Model {
 		}
 	}
 
-	private void stageOne() {
-		background = "res/environment/ss_background_layered.png";
-
-		PlatformList.clear();
-		int position = 0;
-		PlatformList.add(new PhysicalGameObject(2, new Point3f(0, 936, 0)));
-		position += PlatformList.get(0).getWidth();
-		PlatformList.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
-		position += PlatformList.get(1).getWidth();
-		PlatformList.add(new PhysicalGameObject(1, new Point3f(position, 936, 0)));
-		position  = PlatformList.get(0).getWidth();
-		PlatformList.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
-		position += PlatformList.get(3).getWidth(); 
-		PlatformList.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
-		position += PlatformList.get(4).getWidth(); 
-		PlatformList.add(new PhysicalGameObject(0, new Point3f(position, 808, 0))); 
-
-		DecorationList.clear();
-		DecorationList.add(new PhysicalGameObject(4, new Point3f(600,1024-64-(144*4),0)));
-	}
+	
 
 	public Player getPlayer() {return player;}
 

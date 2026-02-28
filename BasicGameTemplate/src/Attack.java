@@ -52,19 +52,13 @@ public class Attack extends GameObject{
     }
 
     // --- Setters & Getters ---
-    public int getDuration() {
-        return duration;
-    }
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-    public float getDamage() {
-        return damage;
-    }
-    public boolean isPlayerMade() {
-        return playerMade;
-    }
+    public int getDuration() {return duration;}
 
-    
+    public void setDuration(int duration) {this.duration = duration;}
 
+    public float getDamage() {return damage;}
+
+    public boolean isPlayerMade() {return playerMade;}
+
+    public Vector3f getMovementVector() {return movementVector;}
 }

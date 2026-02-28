@@ -41,6 +41,7 @@ public class Viewer extends JPanel {
 	Model gameworld; 
 	private Image blank;
 	private Image playerSprites;
+	private Image playerBullet;
 	private Image background;
 	private HashMap<String, Image> objectSprites = new HashMap<>();
 	private HashMap<String, Image> enemySprites = new HashMap<>();
@@ -50,10 +51,12 @@ public class Viewer extends JPanel {
 		// I don't know why we loaded the textures every frame, its a huge hit to performance.
 		File blankTexture = new File("res/blankSprite.png");
 		File playerTexture = new File(gameworld.getPlayer().getTexture()); 
+		File pBulTexture = new File("res/player/Moving.png");
 		File bgTexture = new File(gameworld.getBackground());
 		try {
 			blank = ImageIO.read(blankTexture);
 			playerSprites = ImageIO.read(playerTexture); 
+			playerBullet = ImageIO.read(pBulTexture);
 			background = ImageIO.read(bgTexture);
 
 		} catch (IOException e) {
@@ -91,7 +94,7 @@ public class Viewer extends JPanel {
 		// change back 
 		gameworld.getBullets().forEach((temp) -> 
 		{ 
-			drawBullet((int) temp.getCentre().getX(), (int) temp.getCentre().getY(), (int) temp.getWidth(), (int) temp.getHeight(), temp.getTexture(),g);	 
+			drawBullet(temp, g);	 
 		}); 
 		
 		//Draw Enemies   
@@ -143,18 +146,22 @@ public class Viewer extends JPanel {
 		g.drawImage(background, 0,0, 1000, 1000, 0 , 0, 180, 180, null); 
 	}
 	
-	private void drawBullet(int x, int y, int width, int height, String texture,Graphics g)
+	private void drawBullet(Attack a, Graphics g)
 	{
-		// TODO Move to constructor after adding new sprites
-		File TextureToLoad = new File(texture);  
-		try {
-			Image myImage = ImageIO.read(TextureToLoad); 
-			//64 by 128 
-			 g.drawImage(myImage, x,y, x+width, y+height, 0 , 0, 63, 127, null); 
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (a.isPlayerMade()) {
+			// I want to try having the animation for the bullet here, as its simple for a player bullet
+			int animationStep = (int) (currentAnimationTime / 6) % 4;	// Steps every 6 frames
+			int xAnim, xOffset;
+			if (a.getMovementVector().getX() > 0) {
+				xAnim = animationStep * 50 + 7;
+				xOffset = 30;
+			} else {
+				xAnim = animationStep * 50 + 37;
+				xOffset = -30;
+			}
+			int x = (int) a.getCentre().getX();
+			int y = (int) a.getCentre().getY();
+			g.drawImage(playerBullet, x, y, x + a.getWidth(), y + a.getHeight(), xAnim, 20, xAnim + xOffset, 33, null); 
 		}
 	}
 	

@@ -36,7 +36,7 @@ public class Player extends GameObject {
     // Attacks
     Random diceGen = new Random();
     private float damage = 1f;
-    private int attackWidth = 32;
+    private int attackWidth = 87;
     private int attackHeight = 32;
     private int attackDuration = 50;
     private int attackSpeed = 3;
@@ -194,6 +194,7 @@ public class Player extends GameObject {
      *  4 is shooting, 5 is getting hit, 6 is dieing
      */
     public void changeAnimation(int animationIndex) {
+        if (verticalFrame != animationIndex) horizontalFrame = 0;
         switch(animationIndex) {
             case 1: {   // Run
                 frames = 8;
@@ -256,7 +257,7 @@ public class Player extends GameObject {
     // --- Getters & Setters
 
 
-    public void isOnGround() {onGround = true;}
+    public boolean isOnGround() {return onGround;}
 
     public void isOnGround(boolean val) {onGround = val;}
 
