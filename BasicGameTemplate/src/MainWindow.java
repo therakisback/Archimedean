@@ -124,7 +124,7 @@ public class MainWindow {
 	public static void win() {playing = false;}
 
 	public static void lose() {
-		framesLeft = 100;
+		framesLeft = 120;
 	}
 
 }

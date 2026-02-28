@@ -21,14 +21,17 @@ public class Player extends GameObject {
     private final float[] BREAK_POINTS = {0f, 10f, 20f, 30f, 40f, 50f, 60f, 70f, 80f, 90f};
     private final int JUMP_TIME = 30;
     private final GameIO io = GameIO.getInstance();
-    // Animations
+    // Animations - A lot of these are public as to make them simpler to access, I dont care if encapsulation is perfect for animations
     private int frames = 12;
-    private int verticalFrame = 0;
-    private int horizontalFrame = 0;
-    private int spriteHeight = 50;
-    private int spriteWidth = 60;
-    private int spriteStartHorizontal = 117;
-    private int spriteStartVertical = 77;
+    public int verticalFrame = 0;
+    public int horizontalFrame = 0;
+    public int spriteHeight = 60;
+    public int spriteWidth = 75;
+    public int drawWidth = 175;
+    public int drawHeight = 120;
+    public int drawOffsetX = 120;
+    public int spriteStartHorizontal = 53;
+    public int spriteStartVertical = 37;
     private int animationRate = 6;    // How many ticks between the next frame
     // Attacks
     Random diceGen = new Random();
@@ -58,7 +61,7 @@ public class Player extends GameObject {
     private int airtime = 0;
 
     private Player() {
-        super("res/player/Elementals_leaf_ranger_288x128_SpriteSheet.png",100,100,new Point3f(500,800,0));
+        super("res/player/Witch.png",30,100,new Point3f(500,800,0));
     }
 
     public static Player getPlayer() {
@@ -115,10 +118,10 @@ public class Player extends GameObject {
         Vector3f movement = new Vector3f(facing * 20, 0, 0);
         if(hasDiceUpgrade) {
             // If the player hase 'Dice' we randomize the damage :)
-            return new Attack("res/Bullet.png", attackWidth, attackHeight, spawn, movement, 
+            return new Attack("res/player/Moving.png", attackWidth, attackHeight, spawn, movement, 
                                 attackDuration, true, rtd());
         } else {
-            return new Attack("res/Bullet.png", attackWidth, attackHeight, spawn, movement, 
+            return new Attack("res/player/Moving.png", attackWidth, attackHeight, spawn, movement, 
                                 attackDuration, true, damage);
         } 
     }
@@ -193,55 +196,60 @@ public class Player extends GameObject {
     public void changeAnimation(int animationIndex) {
         switch(animationIndex) {
             case 1: {   // Run
-                frames = 10;
+                frames = 8;
                 verticalFrame = 1;
+                animationRate = 6;
                 break;
             }
             case 2: {   // jump
                 frames = 3;
-                verticalFrame = 3;
+                verticalFrame = 2;
+                animationRate = 6;
                 break;
             }
             case 3: {   // fall
                 frames = 3;
-                verticalFrame = 5;
+                verticalFrame = 3;
+                animationRate = 6;
                 break;
             }
             case 4: {  // shooting 
-                frames = 15;
-                verticalFrame = 11;
-                animationRate = 3;
+                frames = 3;
+                verticalFrame = 4;
+                animationRate = (60 / attackSpeed) / 3;
                 break;
             }
             case 5: {   // hit
-                frames = 6;
-                verticalFrame = 15;
+                frames = 3;
+                verticalFrame = 5;
                 animationRate = 2;
                 break;
             }
             case 6: {   // die
-                frames = 19;
-                verticalFrame = 16;
+                frames = 18;
+                verticalFrame = 6;
                 animationRate = 8;
                 break;
             }
-            default: {
-                frames = 12;
+            default: {  // idle
+                frames = 10;
                 verticalFrame = 0;
-                animationRate = 6;
+                animationRate = 10;
             }
         }
         // Handle flipping of sprites
         if (facing == 1) {
-            spriteHeight = 50;
-            spriteWidth = 60;
-            spriteStartHorizontal = 117;
-            spriteStartVertical = 77;
+            spriteHeight = 60;
+            spriteWidth = 75;
+            spriteStartHorizontal = 53;
+            spriteStartVertical = 37;
+            drawOffsetX = 120;
         }  else if (facing == -1) {
-            spriteHeight = 50;
-            spriteWidth = -60;
-            spriteStartHorizontal = 117 + 60;
-            spriteStartVertical = 77;
+            spriteHeight = 60;
+            spriteWidth = -75;
+            drawOffsetX = 20;
+            spriteStartHorizontal = 53 + 75;
+            spriteStartVertical = 37;
         }
     }
 
@@ -274,5 +282,13 @@ public class Player extends GameObject {
 
     public int getAnimationRate() {
         return animationRate;
+    }
+
+    public int getDrawWidth() {
+        return drawWidth;
+    }
+
+    public int getDrawHeight() {
+        return drawHeight;
     }
 }

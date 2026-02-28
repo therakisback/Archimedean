@@ -40,7 +40,7 @@ public class Model {
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
-	private float difficulty = .01f;
+	private float difficulty = .00f;
 	private int mobCap = (int)(difficulty * 100f);
 
 	// Controllers
@@ -100,21 +100,7 @@ public class Model {
 					System.out.println("Player damaged! HP remaining: " + player.damage(0));
 				}
 			}
-		}
-
-		// Collision for player
-		for (GameObject plat : PlatformList) {
-			Vector3f collisionVector = collisionDetector(plat, player);
-			if (collisionVector.length() != 0) {
-				// We arent able to use playerVector here because we need the collsion response
-				// to be immediate. If we changed playerVector it would only apply on the next frame.
-				player.getCentre().ApplyVector(collisionVector);
-				if (collisionVector.getY() > 0) player.isOnGround();
-				else if (collisionVector.getY() < 0) player.bonk();
-			} //else if (collisionVector.getY() >= 0) player.changeAnimation(3);
-			System.out.println(collisionVector);
-		}
-		
+		}	
 	}
 
 	private void enemyLogic() {
@@ -172,33 +158,50 @@ public class Model {
 		   to Model, where it is all combined and finalized
 		 */ 
 		Vector3f playerVelocity = new Vector3f();
+		boolean falling = true;
 		player.changeAnimation(0);
 
-		if (player.damage(0) <= 0.0) {
-			player.changeAnimation(6);
-			return;
-		}
-
-		if(Controller.getInstance().isKeyAPressed())
-		{
-			playerVelocity.Plus(player.moveLeft());
-			player.changeAnimation(1);
-		} 
-		if(Controller.getInstance().isKeyDPressed())
-		{
-			playerVelocity.Plus(player.moveRight());
-			player.changeAnimation(1);
-		}
-			
 		if(Controller.getInstance().isKeyWPressed())
 		{
 			playerVelocity.Plus(player.jump());
 			player.changeAnimation(2);
+		} else {
+			playerVelocity.Plus(player.fall());
 		}
 
-		if(!controller.isKeyWPressed()) {
-			playerVelocity.Plus(player.fall());
-			// falling animation is handled with collision in gamelogic, gravity does not signify "falling," its the lack of something under you.
+		// Apply Velocity for falling,
+		player.getCentre().ApplyVector(playerVelocity);
+
+		// Collision for player - we have to apply collisions immediately or risk multiple platforms applying a vector at the same time
+		for (GameObject plat : PlatformList) {
+			Vector3f collisionVector = collisionDetector(plat, player);
+			player.getCentre().ApplyVector(collisionVector);
+			if (collisionVector.getY() > 0) {
+				player.isOnGround();
+				falling = false;
+			} else if (collisionVector.getY() < 0) player.bonk();
+		}
+		// falling animation
+		if (falling && playerVelocity.getY() < 0) player.changeAnimation(3);
+
+		// Reset vector for horizontal movement
+		playerVelocity = new Vector3f();
+
+		
+		if(mouse.isLMBPressed()) {
+			if (pCooldown == 0 && !falling) {
+				BulletList.add(player.fire());
+				pCooldown =  (int) (60 / player.attackSpeed());
+			}
+			player.changeAnimation(4);
+		} 
+		else if(Controller.getInstance().isKeyAPressed()) {
+			playerVelocity.Plus(player.moveLeft());
+			if (!falling) player.changeAnimation(1);
+		} 
+		else if(Controller.getInstance().isKeyDPressed()) {
+			playerVelocity.Plus(player.moveRight());
+			if (!falling) player.changeAnimation(1);
 		}
 
 		if(controller.isKeyQPressed()) {
@@ -213,17 +216,17 @@ public class Model {
 			// TODO implement third ability func
 		}
 
-		if(mouse.isLMBPressed()) {
-			if (pCooldown == 0) {
-				BulletList.add(player.fire());
-				pCooldown =  (int) (60 / player.attackSpeed());
-			}
-			player.changeAnimation(4);
+		player.getCentre().ApplyVector(playerVelocity);
+
+		// Damage takes priority for animations, so its last
+		if (player.damage(0) <= 0.0) {
+			player.changeAnimation(6);
+			return;
 		}
+
+
 		if (pIFrames > 0) pIFrames--;
 		if (pCooldown > 0) pCooldown--;
-		// Apply Velocity
-		player.getCentre().ApplyVector(playerVelocity);
 	}
 
 	/**

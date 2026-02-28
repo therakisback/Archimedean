@@ -42,7 +42,7 @@ public class Enemy extends GameObject {
 
     public Enemy(int enemyType, GameObject player) {
         // I hate that java v<25 doesn't allow flexible constructor bodies. This is a bandaid to a feature that should've been implemented LONG ago.
-        super("res/enemies/Sword.png", 50, 50, new Point3f(-1000, -1000, 0));
+        super("res/enemies/Sword.png", 75, 75, new Point3f(-1000, -1000, 0));
         this.player = player;
         this.enemyType = enemyType;
         switch (enemyType) {

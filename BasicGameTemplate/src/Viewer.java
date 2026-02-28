@@ -39,6 +39,7 @@ public class Viewer extends JPanel {
 	private long currentAnimationTime= 0; 
 	
 	Model gameworld; 
+	private Image blank;
 	private Image playerSprites;
 	private Image background;
 	private HashMap<String, Image> objectSprites = new HashMap<>();
@@ -47,13 +48,17 @@ public class Viewer extends JPanel {
 	public Viewer(Model World) {
 		this.gameworld=World;
 		// I don't know why we loaded the textures every frame, its a huge hit to performance.
+		File blankTexture = new File("res/blankSprite.png");
 		File playerTexture = new File(gameworld.getPlayer().getTexture()); 
 		File bgTexture = new File(gameworld.getBackground());
 		try {
+			blank = ImageIO.read(blankTexture);
 			playerSprites = ImageIO.read(playerTexture); 
 			background = ImageIO.read(bgTexture);
 
 		} catch (IOException e) {
+			playerSprites = blank;
+			background = blank;
 			e.printStackTrace();
 		} 
 	}
@@ -156,11 +161,15 @@ public class Viewer extends JPanel {
 
 	private void drawPlayer(Player p, Graphics g) { 
 		if (currentAnimationTime % p.getAnimationRate() == 0) p.stepAnimation();
-		int xAnim = p.getHorizontalFrame() * 288 + p.getSpriteStartHorizontal(); 
-		int yAnim = p.getVerticalFrame() * 128 + p.getSpriteStartVertical();
-		int x = (int) p.getCentre().getX();
-		int y = (int) p.getCentre().getY();
-		g.drawImage(playerSprites, x, y, x+p.getWidth(), y+p.getHeight(), xAnim, yAnim, xAnim+p.getSpriteWidth(), yAnim+p.getSpriteHeight(), null); 
+		int xAnim = p.horizontalFrame * 140 + p.spriteStartHorizontal; 
+		int yAnim = p.verticalFrame * 140 + p.spriteStartVertical;
+		// The subtraction has to be done so that there is a disconnect between hitbox (getWidth()) and sprite
+		int x = (int) p.getCentre().getX() - (p.drawWidth - p.getWidth()) + p.drawOffsetX;
+		int y = (int) p.getCentre().getY() - (p.drawHeight - p.getHeight());
+		int x2 = (int) p.getCentre().getX() + p.drawWidth - (p.drawWidth - p.getWidth()) + p.drawOffsetX;		
+		int y2 = (int) p.getCentre().getY() + p.drawHeight - (p.drawHeight - p.getHeight());
+		// This draws the players hitbox -> g.drawImage(blank, (int) p.getCentre().getX(), (int) p.getCentre().getY(), (int) p.getCentre().getX() + p.getWidth(), (int) p.getCentre().getY() + p.getHeight(), 0, 0, 15, 15, null);
+		g.drawImage(playerSprites, x, y, x2, y2, xAnim, yAnim, xAnim+p.spriteWidth, yAnim+p.spriteHeight, null); 
 	}
 
 	private void drawPlatforms(PhysicalGameObject p, Graphics g) {
