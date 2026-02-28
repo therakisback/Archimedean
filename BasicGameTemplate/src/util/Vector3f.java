@@ -118,6 +118,11 @@ public class Vector3f {
 		return new Vector3f(s0, s1, s2);
 	}
 
+	@Override
+	public String toString() {
+		return ("X: " + x + "\tY: " + y + "\tZ: " + z);
+	}
+
 	public float getX() {
 		return x;
 	}

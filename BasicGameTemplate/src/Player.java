@@ -25,13 +25,18 @@ public class Player extends GameObject {
     private int frames = 12;
     private int verticalFrame = 0;
     private int horizontalFrame = 0;
+    private int spriteHeight = 50;
+    private int spriteWidth = 60;
+    private int spriteStartHorizontal = 117;
+    private int spriteStartVertical = 77;
+    private int animationRate = 6;    // How many ticks between the next frame
     // Attacks
     Random diceGen = new Random();
     private float damage = 1f;
     private int attackWidth = 32;
     private int attackHeight = 32;
     private int attackDuration = 50;
-    private int attackSpeed = 10;
+    private int attackSpeed = 3;
     private int playerWidth = 50;
     private int playerHeight = 50;
     private int iFrames = 30;    // TODO could be modified by upgrades
@@ -42,11 +47,11 @@ public class Player extends GameObject {
     private int thirdAbility = 0;
     private float xpMult = 1f;
     private float experience = 0;
-    private float maxHealth = 4;
+    private float maxHealth = 5;
     private float hp = maxHealth; 
     // Movement
     private float moveSpeed = 4;
-    private int facing = -1;
+    private int facing = 1;
     private boolean onGround = false;
     private boolean jumpReset = true;
     // Cooldowns
@@ -107,7 +112,7 @@ public class Player extends GameObject {
 
     public Attack fire() {
         Point3f spawn = this.getCentre().add(new Point3f(32, 0, 0));
-        Vector3f movement = new Vector3f(facing * attackSpeed, 0, 0);
+        Vector3f movement = new Vector3f(facing * 20, 0, 0);
         if(hasDiceUpgrade) {
             // If the player hase 'Dice' we randomize the damage :)
             return new Attack("res/Bullet.png", attackWidth, attackHeight, spawn, movement, 
@@ -180,8 +185,64 @@ public class Player extends GameObject {
         horizontalFrame = horizontalFrame % frames;
     }
 
-    public void changeAnimation() {
-
+    /**
+     * Sets up a different type of animation based on Index. Unfortunately due to the framework of this game, some of this will have to be handled by model.
+     * @param animationIndex refers to the type of animation to do, 0 & undef is idle, 1 is running, 2 is jumping, 3 is falling,
+     *  4 is shooting, 5 is getting hit, 6 is dieing
+     */
+    public void changeAnimation(int animationIndex) {
+        switch(animationIndex) {
+            case 1: {   // Run
+                frames = 10;
+                verticalFrame = 1;
+                break;
+            }
+            case 2: {   // jump
+                frames = 3;
+                verticalFrame = 3;
+                break;
+            }
+            case 3: {   // fall
+                frames = 3;
+                verticalFrame = 5;
+                break;
+            }
+            case 4: {  // shooting 
+                frames = 15;
+                verticalFrame = 11;
+                animationRate = 3;
+                break;
+            }
+            case 5: {   // hit
+                frames = 6;
+                verticalFrame = 15;
+                animationRate = 2;
+                break;
+            }
+            case 6: {   // die
+                frames = 19;
+                verticalFrame = 16;
+                animationRate = 8;
+                break;
+            }
+            default: {
+                frames = 12;
+                verticalFrame = 0;
+                animationRate = 6;
+            }
+        }
+        // Handle flipping of sprites
+        if (facing == 1) {
+            spriteHeight = 50;
+            spriteWidth = 60;
+            spriteStartHorizontal = 117;
+            spriteStartVertical = 77;
+        }  else if (facing == -1) {
+            spriteHeight = 50;
+            spriteWidth = -60;
+            spriteStartHorizontal = 117 + 60;
+            spriteStartVertical = 77;
+        }
     }
 
     // --- Getters & Setters
@@ -202,4 +263,16 @@ public class Player extends GameObject {
     public int getVerticalFrame() {return verticalFrame;}
 
     public int getHorizontalFrame() {return horizontalFrame;}
+
+    public int getSpriteStartVertical() {return spriteStartVertical;}
+
+    public int getSpriteStartHorizontal() {return spriteStartHorizontal;}
+
+    public int getSpriteWidth() {return spriteWidth;}
+
+    public int getSpriteHeight() {return spriteHeight;}
+
+    public int getAnimationRate() {
+        return animationRate;
+    }
 }

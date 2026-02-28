@@ -28,9 +28,21 @@ public class Enemy extends GameObject {
     private boolean onGround;
     private Random random = new Random();
 
+        // Animations
+    private int frames = 7;
+    private int verticalFrame = 0;
+    private int horizontalFrame = 0;
+    private int spriteHeight = 22;
+    private int spriteWidth = 26;
+    private int spriteStartHorizontal = 13;
+    private int spriteStartVertical = 26;
+    private int spriteStepHorizontal = 128;
+    private int spriteStepVertical = 64; 
+
+
     public Enemy(int enemyType, GameObject player) {
         // I hate that java v<25 doesn't allow flexible constructor bodies. This is a bandaid to a feature that should've been implemented LONG ago.
-        super("res/UFO.png", 50, 50, new Point3f(-1000, -1000, 0));
+        super("res/enemies/Sword.png", 50, 50, new Point3f(-1000, -1000, 0));
         this.player = player;
         this.enemyType = enemyType;
         switch (enemyType) {
@@ -93,6 +105,16 @@ public class Enemy extends GameObject {
         }
     }
 
+    // --- Animation ---
+
+    public void stepAnimation() {
+        horizontalFrame++;
+        horizontalFrame = horizontalFrame % frames;
+    }
+
+
+    // --- Setters & Getters ---
+
     public void isOnGround() {onGround = true;}
 
     public void bonk() {if (airtime > GRAVITYRATE) airtime = (int) GRAVITYRATE;}
@@ -104,4 +126,22 @@ public class Enemy extends GameObject {
     public float damage(float dealt) {health -= damage;return health;}
 
     public float hp() {return health;}
+
+    // Animation getters, It has to hold all this info in case I want to add another enemy type & sprite.
+
+    public int getVerticalFrame() {return verticalFrame;}
+
+    public int getHorizontalFrame() {return horizontalFrame;}
+
+    public int getSpriteStepVertical() {return spriteStepVertical;}
+
+    public int getSpriteStepHorizontal() {return spriteStepHorizontal;}
+
+    public int getSpriteStartVertical() {return spriteStartVertical;}
+
+    public int getSpriteStartHorizontal() {return spriteStartHorizontal;}
+
+    public int getSpriteWidth() {return spriteWidth;}
+
+    public int getSpriteHeight() {return spriteHeight;}
 }

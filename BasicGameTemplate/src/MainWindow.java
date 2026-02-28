@@ -53,6 +53,7 @@ public class MainWindow {
 	 private static boolean startGame= false; 
 	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
+	 private static int framesLeft = -1;
 	  
 	public MainWindow() {
 	        frame.setSize(1024, 1024);  // you can customise this later and adapt it to change on size.  
@@ -97,16 +98,17 @@ public class MainWindow {
 
 	public static void main(String[] args) {
 		MainWindow hello = new MainWindow();  //sets up environment 
-		while(playing) { 
+		while(playing && (framesLeft > 0 || framesLeft == -1)) { 
 			int TimeBetweenFrames =  1000 / TARGET_FPS;
 			long FrameCheck = System.currentTimeMillis() + (long) TimeBetweenFrames; 
 			
-		 while (FrameCheck > System.currentTimeMillis()){} 
+			while (FrameCheck > System.currentTimeMillis()){} 
 			if(startGame) {
-				 gameloop();
-				 }
+				gameloop();
+				if (framesLeft > 0) framesLeft--;
+			}
 
-		 UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TARGET_FPS);  
+			UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TARGET_FPS);  
 		}
 
 		// TODO Implement win / loss screen
@@ -121,7 +123,9 @@ public class MainWindow {
 
 	public static void win() {playing = false;}
 
-	public static void lose() {playing = false;}
+	public static void lose() {
+		framesLeft = 100;
+	}
 
 }
 

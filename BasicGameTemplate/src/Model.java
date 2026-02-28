@@ -52,6 +52,7 @@ public class Model {
 	private final CopyOnWriteArrayList<PhysicalGameObject> PlatformList = new CopyOnWriteArrayList<>();
 	private final CopyOnWriteArrayList<PhysicalGameObject> DecorationList = new CopyOnWriteArrayList<>();
 	private String background;
+	private boolean gameOver = false;
 
 	public Model() {
 		//setup game world 
@@ -61,7 +62,7 @@ public class Model {
 	// This is the heart of the game , where the model takes in all the inputs ,decides the outcomes and then changes the model accordingly. 
 	public void gamelogic() 
 	{
-		// Player Logic first 
+		// Player Logic first
 		playerLogic(); 
 		// Enemy Logic next
 		enemyLogic();
@@ -73,6 +74,7 @@ public class Model {
 	}
 
 	private void gameLogic() { 
+		if (gameOver) return;
 		// Enemy hitting
 		for (Enemy enemy : EnemiesList) {
 			for (Attack bullet : BulletList) {
@@ -90,7 +92,10 @@ public class Model {
 			if (collisionDetector(enemy, player).length() != 0) {
 				// I-Frames have to be managed in Model so that they can be decremented every frame.
 				if (pIFrames == 0) {
-					if (player.damage(enemy.getDamage()) <= 0.1f) MainWindow.lose();
+					if (player.damage(enemy.getDamage()) <= 0.1f) {
+						MainWindow.lose();
+						gameOver =true;
+					}
 					pIFrames = player.getIFrames();
 					System.out.println("Player damaged! HP remaining: " + player.damage(0));
 				}
@@ -106,7 +111,8 @@ public class Model {
 				player.getCentre().ApplyVector(collisionVector);
 				if (collisionVector.getY() > 0) player.isOnGround();
 				else if (collisionVector.getY() < 0) player.bonk();
-			}
+			} //else if (collisionVector.getY() >= 0) player.changeAnimation(3);
+			System.out.println(collisionVector);
 		}
 		
 	}
@@ -166,29 +172,33 @@ public class Model {
 		   to Model, where it is all combined and finalized
 		 */ 
 		Vector3f playerVelocity = new Vector3f();
+		player.changeAnimation(0);
+
+		if (player.damage(0) <= 0.0) {
+			player.changeAnimation(6);
+			return;
+		}
 
 		if(Controller.getInstance().isKeyAPressed())
 		{
 			playerVelocity.Plus(player.moveLeft());
-		} else if (playerVelocity.getX() < 0) {
-			playerVelocity.Plus(new Vector3f(FRICTION, 0, 0));
-		}
-		
+			player.changeAnimation(1);
+		} 
 		if(Controller.getInstance().isKeyDPressed())
 		{
 			playerVelocity.Plus(player.moveRight());
-		}else if (playerVelocity.getX() > 0) {
-			playerVelocity.Plus(new Vector3f(-FRICTION, 0, 0));
+			player.changeAnimation(1);
 		}
 			
 		if(Controller.getInstance().isKeyWPressed())
 		{
 			playerVelocity.Plus(player.jump());
-			
+			player.changeAnimation(2);
 		}
 
 		if(!controller.isKeyWPressed()) {
 			playerVelocity.Plus(player.fall());
+			// falling animation is handled with collision in gamelogic, gravity does not signify "falling," its the lack of something under you.
 		}
 
 		if(controller.isKeyQPressed()) {
@@ -208,6 +218,7 @@ public class Model {
 				BulletList.add(player.fire());
 				pCooldown =  (int) (60 / player.attackSpeed());
 			}
+			player.changeAnimation(4);
 		}
 		if (pIFrames > 0) pIFrames--;
 		if (pCooldown > 0) pCooldown--;

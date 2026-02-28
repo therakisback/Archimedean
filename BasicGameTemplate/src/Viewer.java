@@ -35,6 +35,7 @@ SOFTWARE.
  * Credits: Kelly Charles (2020)
  */ 
 public class Viewer extends JPanel {
+	private final int ANIMATION_STEP_RATE = 6;
 	private long currentAnimationTime= 0; 
 	
 	Model gameworld; 
@@ -122,10 +123,12 @@ public class Viewer extends JPanel {
 		}
 
 		// Now Draw
-		int currentPositionInAnimation= ((int) (currentAnimationTime%4 )*32); //slows down animation so every 10 frames we get another frame so every 100ms 
+		if (currentAnimationTime % ANIMATION_STEP_RATE == 0) e.stepAnimation();
+		int xAnim = e.getHorizontalFrame() * e.getSpriteStepHorizontal() + e.getSpriteStartHorizontal(); 
+		int yAnim = e.getVerticalFrame() * e.getSpriteStepVertical() + e.getSpriteStartVertical();
 		int x = (int) e.getCentre().getX();
 		int y = (int) e.getCentre().getY();
-		g.drawImage(enemySprites.get(e.getTexture()), x, y, x+e.getWidth(), y+e.getHeight(), currentPositionInAnimation  , 0, currentPositionInAnimation+31, 32, null); 
+		g.drawImage(enemySprites.get(e.getTexture()), x, y, x+e.getWidth(), y+e.getHeight(), xAnim  , yAnim, xAnim + e.getSpriteWidth(), yAnim + e.getSpriteHeight(), null); 
 
 
 	}
@@ -152,16 +155,17 @@ public class Viewer extends JPanel {
 	
 
 	private void drawPlayer(Player p, Graphics g) { 
-		if (currentAnimationTime % 4 == 0) p.stepAnimation();
-		int xAnim = p.getHorizontalFrame() * 288 + 117; 
-		int yAnim = p.getVerticalFrame() * 128 + 77;
+		if (currentAnimationTime % p.getAnimationRate() == 0) p.stepAnimation();
+		int xAnim = p.getHorizontalFrame() * 288 + p.getSpriteStartHorizontal(); 
+		int yAnim = p.getVerticalFrame() * 128 + p.getSpriteStartVertical();
 		int x = (int) p.getCentre().getX();
 		int y = (int) p.getCentre().getY();
-		g.drawImage(playerSprites, x, y, x+p.getWidth(), y+p.getHeight(), xAnim, yAnim, xAnim+60, yAnim+50, null); 
+		g.drawImage(playerSprites, x, y, x+p.getWidth(), y+p.getHeight(), xAnim, yAnim, xAnim+p.getSpriteWidth(), yAnim+p.getSpriteHeight(), null); 
 	}
 
 	private void drawPlatforms(PhysicalGameObject p, Graphics g) {
 		// Load sprites and keep them in memory so we arent constantly rereading the file and image.
+		// It would be better if this was done in the constructor, but this works for now.
 		if (!objectSprites.containsKey(p.getTexture())) {
 			File TextureToLoad = new File(p.getTexture());  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
 			try {
