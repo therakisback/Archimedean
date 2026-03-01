@@ -7,10 +7,11 @@ import util.Point3f;
  */
 public class PhysicalGameObject extends GameObject {
     
-    int spriteWidth, spriteHeight;
+    int spriteWidth, spriteHeight, objectType;
 
     public PhysicalGameObject(int objectType, Point3f position) {
         super("res/blankSprite.png", 16, 16, position);
+        this.objectType = objectType;
         switch (objectType) {
             case 1: {
                 super.textureLocation = "res/environment/springstar_surface_1.png";
@@ -32,6 +33,10 @@ public class PhysicalGameObject extends GameObject {
                 super.textureLocation = "res/environment/springstar_boulder.png";
                 spriteWidth = 32; spriteHeight = 32;break;
             }
+            case 6: {
+                super.textureLocation = "res/environment/Dimensional_Portal.png";
+                spriteWidth = 32; spriteHeight = 32;break;
+            }
             default: {
                 super.textureLocation = "res/environment/springstar_middle_platform.png";
                 spriteWidth = 16; spriteHeight = 5;break;
@@ -40,7 +45,10 @@ public class PhysicalGameObject extends GameObject {
     }
 
     public int getSpriteHeight() {return spriteHeight;}
+
     public int getSpriteWidth() {return spriteWidth;}
+
+    public int objectType() {return objectType;}
 
     @Override
     public int getHeight() {return spriteHeight * 4;}

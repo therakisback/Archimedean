@@ -32,7 +32,9 @@ public class Point3f {
 	private float y;
 	private float z;
 	
-	private int boundary=935;
+	// ??? Why does Point3f hold an implicit boundary??? This is so out of scope.
+	// I am leaving this stictly because I do not have time to refactor it, but this is *terrible* practice.
+	private int boundary=1550;
 
 	public Point3f(float x, float y, float z) { 
 		this.x = x;
@@ -44,6 +46,7 @@ public class Point3f {
 		this(0f, 0f, 0f);
 	}
 	
+	// And this method is private by default? Its literally never used.
 	private void setBoundary(int boundary) {
 		this.boundary = boundary;
 		
@@ -87,7 +90,7 @@ public class Point3f {
 	 
 	
 	
-	 //Use for direct application of a Vector 
+	//Use for direct application of a Vector 
 	public void ApplyVector(Vector3f vector) { 
 		 setX(CheckBoundary(this.getX()+vector.getX()));
 		 setY(CheckBoundary(this.getY()-vector.getY()));

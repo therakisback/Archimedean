@@ -89,6 +89,17 @@ public class Viewer extends JPanel {
 		
 		//Draw background 
 		drawBackground(g);
+
+		gameworld.getDecorations().forEach((temp) ->
+		{ 
+			drawPlatforms(temp, g);
+		});
+
+		//Draw Platforms
+		gameworld.getPlatforms().forEach((temp) ->
+		{
+			drawPlatforms(temp, g);
+		});
 		  
 		//Draw Bullets 
 		// change back 
@@ -103,20 +114,13 @@ public class Viewer extends JPanel {
 			drawEnemies(temp,g);	 
 		 
 	    });
-		
-		//Draw Platforms
-		gameworld.getPlatforms().forEach((temp) ->
-		{
-			drawPlatforms(temp, g);
-		});
-
-		gameworld.getDecorations().forEach((temp) ->
-		{ 
-			drawPlatforms(temp, g);
-		});
 
 		//Draw player
 		drawPlayer(gameworld.getPlayer() ,g);
+
+		if (gameworld.renderPortal) {
+			drawPlatforms(gameworld.getPortal(), g);
+		}
 	}
 	
 	private void drawEnemies(Enemy e, Graphics g) {
@@ -136,6 +140,7 @@ public class Viewer extends JPanel {
 		int yAnim = e.getVerticalFrame() * e.getSpriteStepVertical() + e.getSpriteStartVertical();
 		int x = (int) e.getCentre().getX();
 		int y = (int) e.getCentre().getY();
+		// Draws enemy hitboxes -> g.drawImage(blank, x, y, x+e.getWidth(), y+e.getHeight(), 0, 0, 16, 16, null);
 		g.drawImage(enemySprites.get(e.getTexture()), x, y, x+e.getWidth(), y+e.getHeight(), xAnim  , yAnim, xAnim + e.getSpriteWidth(), yAnim + e.getSpriteHeight(), null); 
 
 
@@ -143,7 +148,7 @@ public class Viewer extends JPanel {
 
 	private void drawBackground(Graphics g)
 	{
-		g.drawImage(background, 0,0, 1000, 1000, 0 , 0, 180, 180, null); 
+		g.drawImage(background, 0,0, 1600, 960, 0 , 0, 576, 324, null); 
 	}
 	
 	private void drawBullet(Attack a, Graphics g)
@@ -188,10 +193,18 @@ public class Viewer extends JPanel {
 				objectSprites.put(p.getTexture(), ImageIO.read(TextureToLoad));
 			} catch (IOException e) {e.printStackTrace();}
 		}
+
 		// Now Draw
 		int x = (int) p.getCentre().getX();
 		int y = (int) p.getCentre().getY();
-		g.drawImage(objectSprites.get(p.getTexture()), x,y, x+p.getWidth(), y+p.getHeight(), 0 , 0, p.spriteWidth, p.spriteHeight, null);	
+		// While this isn't preferrable, I am short on time and want an animated portal, so it will be an exception
+		if (p.objectType() == 6) {
+			int animationStep = (int) (currentAnimationTime / 6) % 4;
+			int xAnim = animationStep * p.spriteWidth + 8;
+			g.drawImage(objectSprites.get(p.getTexture()), x, y, x+p.getWidth(), y+p.getHeight(), xAnim, 0, xAnim + p.spriteWidth, p.spriteHeight, null);
+		} else {
+			g.drawImage(objectSprites.get(p.getTexture()), x, y, x+p.getWidth(), y+p.getHeight(), 0 , 0, p.spriteWidth, p.spriteHeight, null);	
+		}
 	}
 }
 

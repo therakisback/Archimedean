@@ -89,6 +89,14 @@ public class Vector3f {
 	}
 	
 	//implement getting the Normal  of a Vector   and comment what the method does
+	// I am not refactoring this code again, but this is a great example of violating Java's naming convention
+	// I was confuse when I typed vector.normal() because its named liked a class, not a method.
+	public Vector3f Normal(float length)
+	{
+		float LengthOfTheVector=this.length();
+		return this.byScalar(length/LengthOfTheVector); 
+	} 
+
 	public Vector3f Normal()
 	{
 		float LengthOfTheVector=  this.length();

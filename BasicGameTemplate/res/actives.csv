@@ -2,6 +2,6 @@ ID, title, description, abilityName, activationKey
 1, Quick Shot, Shoot out a fast volley of shots!, pewpew, q
 2, Morphine, Heal 1 health, heal, q
 3, Wings, Gain flight for a short period of time!, wings, e
-4, Parry, ...and riposte!, invulnerable, e
-5, Self Combustion!, Explode in a everything! Including you!, boom, r
-6, Gatling Barrage, Rain hell upon your enemies, barrage, r
+4, Parry, ...and riposte!, invulnerable, q
+5, Self Combustion!, Explode in a everything! Including you!, boom, e
+6, Gatling Barrage, Rain hell upon your enemies, barrage, e

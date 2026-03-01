@@ -1,6 +1,4 @@
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
@@ -8,14 +6,11 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import util.UnitTests;
 
 public class MainWindow {
@@ -24,18 +19,18 @@ public class MainWindow {
 	 private static final Viewer canvas = new Viewer(gameworld);
 	 private KeyListener controller = Controller.getInstance();
 	 private MouseListener mouse = Mouse.getInstance();
-	 private static final int TARGET_FPS = 10;
+	 private static final int TARGET_FPS = 60;
 	 private static boolean startGame= false; 
 	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
 	 private static int framesLeft = -1;
 	  
 	public MainWindow() {
-	        frame.setSize(1024, 1024);  // you can customise this later and adapt it to change on size.  
+	        frame.setSize(1600, 1024);  // you can customise this later and adapt it to change on size.  
 	      	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);   //If exit // you can modify with your way of quitting , just is a template.
 	        frame.setLayout(null);
 	        frame.add(canvas);  
-	        canvas.setBounds(0, 0, 1024, 1024); 
+	        canvas.setBounds(0, 0, 1600, 1024); 
 			canvas.setBackground(new Color(255,255,255)); //white background  replaced by Space background but if you remove the background method this will draw a white screen 
 		    canvas.setVisible(false);   // this will become visible after you press the key. 
 		       

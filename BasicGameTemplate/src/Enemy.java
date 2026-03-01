@@ -43,11 +43,37 @@ public class Enemy extends GameObject {
     public Enemy(int enemyType, GameObject player) {
         // I hate that java v<25 doesn't allow flexible constructor bodies. This is a bandaid to a feature that should've been implemented LONG ago.
         super("res/enemies/Sword.png", 75, 75, new Point3f(-1000, -1000, 0));
+        if (enemyType == 0) enemyType = 1;
         this.player = player;
         this.enemyType = enemyType;
         switch (enemyType) {
-            default: {
-                int spawnX = random.nextBoolean() ?  0 : -950;
+            case 2: {   // Bats
+                super.textureLocation = "res/enemies/bat_angry_fangs.png";
+                int spawnX = random.nextInt(3) * 760;
+                spawn = new Point3f(spawnX, 100, 0);
+                super.setCentre(spawn);
+                target = player.getCentre();
+                damage = 1;
+                moveSpeed = 2;
+                acceleration = .05f;
+                health = 1;
+                width = 60;
+                height = 32;
+
+                frames = 4;
+                spriteWidth = 30;
+                spriteHeight = 16;
+                spriteStartHorizontal = 1;
+                spriteStartVertical = 7;
+                spriteStepHorizontal = 32;
+                spriteStepVertical = 0; 
+                break;
+            }
+            case 3: {   // Wizard?
+
+            }
+            default: {  // Sword
+                int spawnX = random.nextBoolean() ?  0 : 1550;
                 spawn = new Point3f(spawnX, 850, 0);
                 super.setCentre(spawn);
                 target = player.getCentre();
@@ -55,8 +81,16 @@ public class Enemy extends GameObject {
                 moveSpeed = 4;
                 acceleration = .1f;
                 health = 1;
-                break;
+                
+                frames = 7;
+                spriteHeight = 22;
+                spriteWidth = 26;
+                spriteStartHorizontal = 13;
+                spriteStartVertical = 26;
+                spriteStepHorizontal = 128;
+                spriteStepVertical = 64; 
             }
+        
         }
     }
 
@@ -66,22 +100,32 @@ public class Enemy extends GameObject {
      */
     public void step() {
         switch(enemyType) {
-            default: {
+            case 2: {   // Bats
+                // Movement - very simple as they dont need gravity, or ground
+                target = player.getCentre();
+                Vector3f path = target.MinusPoint(centre).Normal(moveSpeed);
+                if(target.distance(centre) > moveSpeed) {
+                    path.setY(-path.getY() * 2);
+                    centre.ApplyVector(path);
+                }
+                break;
+            }
+            default: {  // Swords
                 // Movement
                 target = player.getCentre();
-                if (target.distance(this.centre) > moveSpeed) {
+                if (target.distance(centre) > moveSpeed) {
                     // If player is above enemy, jump
-                    if (target.getY() + player.getHeight() < this.centre.getY()) {
+                    if (target.getY() + player.getHeight() < centre.getY()) {
                         if (onGround) {
                             airtime = JUMPTIME;
                             onGround = false; 
                         }
                     }
                     // Move horizontally towards player
-                    if (target.getX() < this.centre.getX()) {
+                    if (target.getX() < centre.getX()) {
                         if (movement.getX() > -moveSpeed) 
                             movement = movement.PlusVector(new Vector3f(-acceleration, 0, 0));
-                    } else if (target.getX() > this.centre.getX()) {
+                    } else if (target.getX() > centre.getX()) {
                         if(movement.getX() < moveSpeed)
                             movement = movement.PlusVector(new Vector3f(acceleration, 0, 0));
                     }
@@ -89,7 +133,7 @@ public class Enemy extends GameObject {
 
                 // Gravity && jumping (easier if seperated)
                 jump(movement);
-                this.centre.ApplyVector(movement);
+                centre.ApplyVector(movement);
                 }
             }
         }

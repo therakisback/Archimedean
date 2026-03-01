@@ -38,7 +38,7 @@ public class Player extends GameObject {
     private float damage = 1f;
     private int attackWidth = 87;
     private int attackHeight = 32;
-    private int attackDuration = 50;
+    private int attackDuration = 20;
     private int attackSpeed = 3;
     private int playerWidth = 50;
     private int playerHeight = 50;
@@ -61,7 +61,7 @@ public class Player extends GameObject {
     private int airtime = 0;
 
     private Player() {
-        super("res/player/Witch.png",30,100,new Point3f(500,800,0));
+        super("res/player/Witch.png",30,100,new Point3f(0,0,0));
     }
 
     public static Player getPlayer() {
@@ -126,13 +126,9 @@ public class Player extends GameObject {
         } 
     }
 
-    // --- Levelling ---
-    public int level(float xp) {
+    // --- Levelling ---    - No longer used for gaining abilities
+    public void level(float xp) {
         experience += xp * xpMult;
-        for (int i = BREAK_POINTS.length-1; i > 0; i--) {
-            if (experience >= BREAK_POINTS[i]) return i;
-        }
-        return 0;
     }
 
     // Abilities
@@ -256,7 +252,6 @@ public class Player extends GameObject {
 
     // --- Getters & Setters
 
-
     public boolean isOnGround() {return onGround;}
 
     public void isOnGround(boolean val) {onGround = val;}
@@ -268,6 +263,10 @@ public class Player extends GameObject {
     public int getIFrames() {return iFrames;}
 
     public float attackSpeed() {return attackSpeed;}
+
+    public float getXP() {return experience;}
+
+    // --- Animation getters ---
 
     public int getVerticalFrame() {return verticalFrame;}
 
@@ -281,15 +280,9 @@ public class Player extends GameObject {
 
     public int getSpriteHeight() {return spriteHeight;}
 
-    public int getAnimationRate() {
-        return animationRate;
-    }
+    public int getAnimationRate() {return animationRate;}
 
-    public int getDrawWidth() {
-        return drawWidth;
-    }
+    public int getDrawWidth() {return drawWidth;}
 
-    public int getDrawHeight() {
-        return drawHeight;
-    }
+    public int getDrawHeight() {return drawHeight;}
 }

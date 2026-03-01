@@ -1,5 +1,4 @@
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import util.GameObject;
 import util.Vector3f; 
@@ -29,31 +28,31 @@ SOFTWARE.
  */ 
 public class Model {
 
-	private final float FRICTION = 2;
+	// World variables
+	private final  CopyOnWriteArrayList<Attack> bulletList  = new CopyOnWriteArrayList<>();
+	private Stage currentStage = new Stage(2);
+	private int stageLevel = 1;
+	private PhysicalGameObject portal;
+	public boolean renderPortal = false;
+	private boolean gameOver = false;
 	
 	// Player variables
 	private final Player player = Player.getPlayer();
 	private int pIFrames = 0;
 	private int pCooldown = 0;
-	private int pLevel = 0;
 
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
-	private float difficulty = .01f;
-	private int mobCap = (int)(difficulty * 100f);
+	private int mobCap = (int)(currentStage.getDifficulty() * 100f);
 
 	// Controllers
 	private final Controller controller = Controller.getInstance();
 	private final Mouse mouse = Mouse.getInstance();
 
-	// World variables
-	private final  CopyOnWriteArrayList<Attack> bulletList  = new CopyOnWriteArrayList<>();
-	private Stage currentStage = new Stage(1);
-	private boolean gameOver = false;
-
+	
 	public Model() {
-		// TODO setup game world
+		player.setCentre(currentStage.getPlayerSpawn() );
 }
 	
 	// This is the heart of the game , where the model takes in all the inputs ,decides the outcomes and then changes the model accordingly. 
@@ -77,12 +76,11 @@ public class Model {
 			for (Attack bullet : bulletList) {
 				if (collisionDetector(enemy, bullet).length() != 0 && bullet.isPlayerMade()) {
 					enemy.damage(bullet.getDamage());
-					if (enemy.hp() <= 0) EnemiesList.remove(enemy);
-					bulletList.remove(bullet);
-					int currentLevel = player.level(enemy.getEnemyType());
-					if ( currentLevel != pLevel) {
-						levelUp(currentLevel);
+					if (enemy.hp() <= 0) {
+						player.level(enemy.getEnemyType());
+						EnemiesList.remove(enemy);
 					}
+					bulletList.remove(bullet);
 				}  
 			}
 			// Player enemy collision
@@ -97,15 +95,31 @@ public class Model {
 					System.out.println("Player damaged! HP remaining: " + player.damage(0));
 				}
 			}
-		}	
+		}
+
+		// If player reaches the bounty, spawn the portal and prompt level-up once every mob is dead
+		if (player.getXP() > currentStage.getBounty() && EnemiesList.isEmpty()) {
+			if (!renderPortal) {
+				portal = currentStage.spawnPortal();
+				renderPortal = true;
+				// prompt level-up
+			}
+			if (collisionDetector(player, portal).length() != 0) {
+				stageLevel++;
+				currentStage = new Stage(stageLevel);
+				player.setCentre(currentStage.getPlayerSpawn());
+				renderPortal = false;
+			}
+		}
 	}
 
 	private void enemyLogic() {
 		// Add credits per frame and spawn new enemies.
-		mobCap = (int)(difficulty * 100f);
-		if (credits < mobCap * 3) credits += difficulty;
-		while (credits >= 1 && EnemiesList.size() < mobCap) {
-			EnemiesList.add(new Enemy(0, player));
+		mobCap = currentStage.getMobCap();
+		if (credits < mobCap * 2) credits += currentStage.getDifficulty();
+		while (credits >= 1 && EnemiesList.size() < mobCap && player.getXP() < currentStage.getBounty()) {
+			System.out.println(player.getXP() + "\t" + currentStage.getBounty());
+			EnemiesList.add(new Enemy(currentStage.randomEnemy(), player));
 			credits--;
 		}
 
@@ -115,7 +129,7 @@ public class Model {
 			bad.step();
 			for (GameObject plat : currentStage.platformList()) {
 				Vector3f collisionVector = collisionDetector(plat, bad);
-				if (collisionVector.length() != 0) {
+				if (collisionVector.length() != 0 && bad.getEnemyType() != 2) {	// We ignore the bats for collision
 					bad.getCentre().ApplyVector(collisionVector);
 					if (collisionVector.getY() > 0) bad.isOnGround();
 					else if (collisionVector.getY() < 0) bad.bonk();
@@ -125,8 +139,6 @@ public class Model {
 	}
 
 	private void bulletLogic() {
-		// TODO Auto-generated method stub
-	  
 		for (Attack temp : bulletList) 
 		{
 		    temp.step();
@@ -134,7 +146,7 @@ public class Model {
 			// Out of Bounds
 			if (temp.getCentre().getX() == 0.0) bulletList.remove(temp);
 			// TODO Inconsitent if screen shape is changed
-			if (temp.getCentre().getX() >= 930) bulletList.remove(temp);
+			if (temp.getCentre().getX() >= 1550) bulletList.remove(temp);
 			// Collision with platforms
 			for (GameObject plat : currentStage.platformList()) {
 				Vector3f collisionVector = collisionDetector(plat, temp);
@@ -148,12 +160,6 @@ public class Model {
 
 	
 	private void playerLogic() {
-		/* I have settled on a bit of a weird way to manage this:
-		   I have implemented a player class that helps to get a lot of out-of-scope 
-		   calculation out of this class, but player motion is still dependent on
-		   the model listening, so the movement methods more just feed calculated info
-		   to Model, where it is all combined and finalized
-		 */ 
 		Vector3f playerVelocity = new Vector3f();
 		boolean falling = true;
 
@@ -221,10 +227,6 @@ public class Model {
 			// TODO Implement second ability func
 		}
 
-		if (controller.isKeyRPressed()) {
-			// TODO implement third ability func
-		}
-
 		player.getCentre().ApplyVector(playerVelocity);
 		if (!falling && playerVelocity.getX() == 0f) 
 
@@ -266,36 +268,9 @@ public class Model {
 		}
 	}
 
-	private void levelUp(int level) {
-		pLevel = level;
-		switch (level) {
-			case 1: 
-			case 3: 
-			case 4: 
-			case 5: 
-			case 7: 
-			case 8: 
-			case 9: {
-				// TODO make passiveID chosen by player
-				int passiveID = new Random().nextInt();
-				player.passive(passiveID);
-				break;
-			}
-			case 2: 
-			case 6: 
-			case 10: {
-				// TODO make activeID chosen by player
-				int activeID = new Random().nextInt();
-				player.active(activeID);
-				break;
-			}
-			default: System.out.println("Illegal level called.");break;
-		}
-	}
-
-	
-
 	public Player getPlayer() {return player;}
+
+	public PhysicalGameObject getPortal() {return portal;}
 
 	public CopyOnWriteArrayList<Enemy> getEnemies() {return EnemiesList;}
 	

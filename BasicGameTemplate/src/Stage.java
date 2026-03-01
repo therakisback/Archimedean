@@ -6,9 +6,13 @@ import util.Point3f;
 
 public class Stage {
 
+	private float difficulty;
+	private int mobCap;
+	private float bounty;		// Amount of experience needed to progress
     private String background;
 	private Point3f portalSpawn;
 	private Point3f playerSpawn; 
+	private PhysicalGameObject portal;
     private ArrayList<PhysicalGameObject> platforms = new ArrayList<>();
 	private ArrayList<PhysicalGameObject> decorations = new ArrayList<>();
 	private ArrayList<Integer> potentialEnemies = new ArrayList<>();
@@ -17,11 +21,23 @@ public class Stage {
     public Stage(int progression) {
         switch (progression) {
 			case 1: stageOne();
+			case 2: stageTwo();
 		}
     }
     
     private void stageOne() {
-		background = "res/environment/ss_background_layered.png";
+		// If you cant figure this one out step away from the computer
+		background = "res/environment/bg1.png";
+
+		// Enemies
+		potentialEnemies.add(1);
+		difficulty = 0.015f;
+		mobCap = 3;
+		bounty = 10;
+
+		// Player
+		playerSpawn = new Point3f(300, 725, 0);
+		portalSpawn = new Point3f(900, 458, 0);
 
 		// Floor
 		platforms.clear();
@@ -31,46 +47,78 @@ public class Stage {
 		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
 		position += platforms.get(1).getWidth();
 		platforms.add(new PhysicalGameObject(1, new Point3f(position, 936, 0)));
+		position += platforms.get(2).getWidth();
+		platforms.add(new PhysicalGameObject(2, new Point3f(position, 936, 0)));
+		position += platforms.get(3).getWidth();
+		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
 
 		// Platforms
-		position  = 200;
-		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
-		position += platforms.get(3).getWidth(); 
-		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
-		position += platforms.get(4).getWidth(); 
-		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0))); 
+		position = 200;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 758, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 758, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 758, 0))); 
 
 		position = 500;
-		platforms.add(new PhysicalGameObject(0, new Point3f(position, 708, 0)));
-		position += platforms.get(3).getWidth(); 
-		platforms.add(new PhysicalGameObject(0, new Point3f(position, 708, 0)));
-		position += platforms.get(4).getWidth(); 
-		platforms.add(new PhysicalGameObject(0, new Point3f(position, 708, 0))); 
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+		position += 64; 
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0))); 
+
+		position = 850;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 608, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 608, 0)));
+		position += 64; 
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 608, 0))); 
+
+		position = 1000;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += 64; 
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += 64;
+		position += 64;
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0))); 
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0))); 
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0))); 
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
 
 		// Decorations
 		decorations.clear();
 		decorations.add(new PhysicalGameObject(4, new Point3f(600,1024-64-(144*4),0)));
 
-		potentialEnemies.add(1);
+		
 	}
+
+	private void stageTwo() {
+		stageOne();
+		potentialEnemies.clear();
+		potentialEnemies.add(2);
+	}
+
+	public PhysicalGameObject spawnPortal() {return new PhysicalGameObject(6, portalSpawn);}
 
 	public List<PhysicalGameObject> platformList() {return platforms;}
 
 	public List<PhysicalGameObject> decorationList() {return decorations;}
 
-	public int randomEnemy() {
-		return potentialEnemies.get(rand.nextInt() % potentialEnemies.size());
-	}
+	public int randomEnemy() {return potentialEnemies.get(rand.nextInt(potentialEnemies.size())) + 1;}
 
-    public String getBackground() {
-        return background;
-    }
+    public String getBackground() {return background;}
 
-    public Point3f getPortalSpawn() {
-        return portalSpawn;
-    }
+    public Point3f getPortalSpawn() {return portalSpawn;}
 
-    public Point3f getPlayerSpawn() {
-        return playerSpawn;
-    }
+    public Point3f getPlayerSpawn() {return playerSpawn;}
+
+	public float getDifficulty() {return difficulty;}
+
+	public float getBounty() {return bounty;}
+
+    public int getMobCap() {return mobCap;}
 }
