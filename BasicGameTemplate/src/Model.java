@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import util.GameObject;
@@ -47,10 +48,8 @@ public class Model {
 	private final Mouse mouse = Mouse.getInstance();
 
 	// World variables
-	private final  CopyOnWriteArrayList<Attack> BulletList  = new CopyOnWriteArrayList<>();
-	private final CopyOnWriteArrayList<PhysicalGameObject> PlatformList = new CopyOnWriteArrayList<>();
-	private final CopyOnWriteArrayList<PhysicalGameObject> DecorationList = new CopyOnWriteArrayList<>();
-	private String background;
+	private final  CopyOnWriteArrayList<Attack> bulletList  = new CopyOnWriteArrayList<>();
+	private Stage currentStage = new Stage(1);
 	private boolean gameOver = false;
 
 	public Model() {
@@ -75,11 +74,11 @@ public class Model {
 		if (gameOver) return;
 		// Enemy hitting
 		for (Enemy enemy : EnemiesList) {
-			for (Attack bullet : BulletList) {
+			for (Attack bullet : bulletList) {
 				if (collisionDetector(enemy, bullet).length() != 0 && bullet.isPlayerMade()) {
 					enemy.damage(bullet.getDamage());
 					if (enemy.hp() <= 0) EnemiesList.remove(enemy);
-					BulletList.remove(bullet);
+					bulletList.remove(bullet);
 					int currentLevel = player.level(enemy.getEnemyType());
 					if ( currentLevel != pLevel) {
 						levelUp(currentLevel);
@@ -114,7 +113,7 @@ public class Model {
 		{
 		    // Move enemies 
 			bad.step();
-			for (GameObject plat : PlatformList) {
+			for (GameObject plat : currentStage.platformList()) {
 				Vector3f collisionVector = collisionDetector(plat, bad);
 				if (collisionVector.length() != 0) {
 					bad.getCentre().ApplyVector(collisionVector);
@@ -128,19 +127,19 @@ public class Model {
 	private void bulletLogic() {
 		// TODO Auto-generated method stub
 	  
-		for (Attack temp : BulletList) 
+		for (Attack temp : bulletList) 
 		{
 		    temp.step();
-			if (temp.getDuration() <= 0) BulletList.remove(temp);
+			if (temp.getDuration() <= 0) bulletList.remove(temp);
 			// Out of Bounds
-			if (temp.getCentre().getX() == 0.0) BulletList.remove(temp);
+			if (temp.getCentre().getX() == 0.0) bulletList.remove(temp);
 			// TODO Inconsitent if screen shape is changed
-			if (temp.getCentre().getX() >= 930) BulletList.remove(temp);
+			if (temp.getCentre().getX() >= 930) bulletList.remove(temp);
 			// Collision with platforms
-			for (GameObject plat : PlatformList) {
+			for (GameObject plat : currentStage.platformList()) {
 				Vector3f collisionVector = collisionDetector(plat, temp);
 				if (collisionVector.length() != 0) {
-					BulletList.remove(temp);
+					bulletList.remove(temp);
 				}
 			}
 		} 
@@ -158,6 +157,12 @@ public class Model {
 		Vector3f playerVelocity = new Vector3f();
 		boolean falling = true;
 
+		// Death animation
+		if (player.damage(0) <= 0.0) {
+			player.changeAnimation(6);
+			return;
+		}
+
 		if(Controller.getInstance().isKeyWPressed())
 		{
 			playerVelocity.Plus(player.jump());
@@ -170,7 +175,7 @@ public class Model {
 		player.getCentre().ApplyVector(playerVelocity);
 
 		// Collision for player - we have to apply collisions immediately or risk multiple platforms applying a vector at the same time
-		for (GameObject plat : PlatformList) {
+		for (GameObject plat : currentStage.platformList()) {
 			Vector3f collisionVector = collisionDetector(plat, player);
 			player.getCentre().ApplyVector(collisionVector);
 			if (collisionVector.getY() > 0) {
@@ -187,25 +192,24 @@ public class Model {
 		
 		if(mouse.isLMBPressed() && player.isOnGround()) {
 			if (pCooldown == 0 && !falling) {
-				System.out.println("shoot");
-				BulletList.add(player.fire());
+				bulletList.add(player.fire());
 				pCooldown =  (int) (60 / player.attackSpeed());
 			}
-			if (!falling) player.changeAnimation(4);
+			if (!falling && pIFrames == 0) player.changeAnimation(4);
 		} 
 		else if (pCooldown > 0) {
-			if (!falling) player.changeAnimation(4);
+			if (!falling && pIFrames == 0) player.changeAnimation(4);
 		}
 		else if(Controller.getInstance().isKeyAPressed()) {
 			playerVelocity.Plus(player.moveLeft());
-			if (!falling) player.changeAnimation(1);
+			if (!falling && pIFrames == 0) player.changeAnimation(1);
 		} 
 		else if(Controller.getInstance().isKeyDPressed()) {
 			playerVelocity.Plus(player.moveRight());
-			if (!falling) player.changeAnimation(1);
+			if (!falling && pIFrames == 0) player.changeAnimation(1);
 		} 
-		else if (!falling && player.isOnGround()) {
-			// If we aren't jumping, falling, moving, shooting, we idle
+		else if (!falling && player.isOnGround() && pIFrames == 0) {
+			// If we aren't jumping, falling, moving, shooting,or getting hit: we idle
 			player.changeAnimation(0);
 		}
 
@@ -224,13 +228,8 @@ public class Model {
 		player.getCentre().ApplyVector(playerVelocity);
 		if (!falling && playerVelocity.getX() == 0f) 
 
-		// Damage takes priority for animations, so its last
-		if (player.damage(0) <= 0.0) {
-			player.changeAnimation(6);
-			return;
-		}
-
 		if (pCooldown > 0) pCooldown--;
+		if (pIFrames > 0) player.changeAnimation(5);	// Hit animation
 		if (pIFrames > 0) pIFrames--;
 	}
 
@@ -300,13 +299,13 @@ public class Model {
 
 	public CopyOnWriteArrayList<Enemy> getEnemies() {return EnemiesList;}
 	
-	public CopyOnWriteArrayList<Attack> getBullets() {return BulletList;}
+	public CopyOnWriteArrayList<Attack> getBullets() {return bulletList;}
 
-	public CopyOnWriteArrayList<PhysicalGameObject> getPlatforms() {return PlatformList;}
+	public List<PhysicalGameObject> getPlatforms() {return currentStage.platformList();}
 
-	public CopyOnWriteArrayList<PhysicalGameObject> getDecorations() {return DecorationList;}
+	public List<PhysicalGameObject> getDecorations() {return currentStage.decorationList();}
 
-	public String getBackground() {return background;}
+	public String getBackground() {return currentStage.getBackground();}
 
 }
 

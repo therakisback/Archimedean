@@ -223,7 +223,7 @@ public class Player extends GameObject {
             case 5: {   // hit
                 frames = 3;
                 verticalFrame = 5;
-                animationRate = 2;
+                animationRate = 11;
                 break;
             }
             case 6: {   // die

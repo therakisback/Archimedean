@@ -175,7 +175,7 @@ public class Viewer extends JPanel {
 		int y = (int) p.getCentre().getY() - (p.drawHeight - p.getHeight());
 		int x2 = (int) p.getCentre().getX() + p.drawWidth - (p.drawWidth - p.getWidth()) + p.drawOffsetX;		
 		int y2 = (int) p.getCentre().getY() + p.drawHeight - (p.drawHeight - p.getHeight());
-		// This draws the players hitbox -> g.drawImage(blank, (int) p.getCentre().getX(), (int) p.getCentre().getY(), (int) p.getCentre().getX() + p.getWidth(), (int) p.getCentre().getY() + p.getHeight(), 0, 0, 15, 15, null);
+		// Draws player hitbox -> g.drawImage(blank, (int) p.getCentre().getX(), (int) p.getCentre().getY(), (int) p.getCentre().getX() + p.getWidth(), (int) p.getCentre().getY() + p.getHeight(), 0, 0, 15, 15, null);
 		g.drawImage(playerSprites, x, y, x2, y2, xAnim, yAnim, xAnim+p.spriteWidth, yAnim+p.spriteHeight, null); 
 	}
 
