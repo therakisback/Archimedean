@@ -18,7 +18,6 @@ public class Player extends GameObject {
     // Constants
     private final float GRAVITY_RATE = 8;
     private final float JUMP_SPEED = 8;
-    private final float[] BREAK_POINTS = {0f, 10f, 20f, 30f, 40f, 50f, 60f, 70f, 80f, 90f};
     private final int JUMP_TIME = 30;
     private final GameIO io = GameIO.getInstance();
     // Animations - A lot of these are public as to make them simpler to access, I dont care if encapsulation is perfect for animations
@@ -40,14 +39,13 @@ public class Player extends GameObject {
     private int attackHeight = 32;
     private int attackDuration = 20;
     private int attackSpeed = 3;
-    private int playerWidth = 50;
-    private int playerHeight = 50;
+    private int playerWidth = 30;
+    private int playerHeight = 100;
     private int iFrames = 30;    // TODO could be modified by upgrades
     private boolean hasDiceUpgrade = false;
     // Player stats
     private int firstAbility = 0;
     private int secondAbility = 0;
-    private int thirdAbility = 0;
     private float xpMult = 1f;
     private float experience = 0;
     private float maxHealth = 5;
@@ -156,7 +154,9 @@ public class Player extends GameObject {
         damage *= mods.get(1);
         attackSpeed *= mods.get(2);
         playerWidth *= mods.get(3);
+        drawWidth *= mods.get(3);
         playerHeight *= mods.get(4);
+        drawHeight *= mods.get(4);
         attackWidth *= mods.get(5);
         attackHeight *= mods.get(6);
         attackDuration *= mods.get(7);
@@ -173,7 +173,6 @@ public class Player extends GameObject {
         switch(io.getKeyByID(activeID)) {
             case 'q': {firstAbility = activeID;}
             case 'e': {secondAbility = activeID;}
-            case 'r': {thirdAbility = activeID;}
             default: {}
         }
     }

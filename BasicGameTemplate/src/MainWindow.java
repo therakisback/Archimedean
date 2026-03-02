@@ -11,12 +11,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.Timer;
 import util.UnitTests;
 
 public class MainWindow {
 	 private static final JFrame frame = new JFrame("Game");   // Change to the name of your game 
 	 private static final Model gameworld= new Model();
 	 private static final Viewer canvas = new Viewer(gameworld);
+	 private static Timer framerate;
 	 private KeyListener controller = Controller.getInstance();
 	 private MouseListener mouse = Mouse.getInstance();
 	 private static final int TARGET_FPS = 60;
@@ -68,27 +70,39 @@ public class MainWindow {
 
 	public static void main(String[] args) {
 		MainWindow hello = new MainWindow();  //sets up environment 
-		while(playing && (framesLeft > 0 || framesLeft == -1)) { 
-			int TimeBetweenFrames =  1000 / TARGET_FPS;
-			long FrameCheck = System.currentTimeMillis() + (long) TimeBetweenFrames; 
-			
-			while (FrameCheck > System.currentTimeMillis()){} 
-			if(startGame) {
+		ActionListener nextGameTick = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
 				gameloop();
-				if (framesLeft > 0) framesLeft--;
 			}
+		};
 
-			UnitTests.CheckFrameRate(System.currentTimeMillis(),FrameCheck, TARGET_FPS);  
+		// It's a lot simpler and more reliable to use java swing timer instead of a while loop.
+		framerate = new Timer(8, nextGameTick);
+		if (playing) {
+			framerate.start();
 		}
-
-		// TODO Implement win / loss screen
-	
 	} 
 	//Basic Model-View-Controller pattern 
 	private static void gameloop() { 
+		if (gameworld.awaitingLevel) {
+			framerate.setRepeats(false);
+			gameworld.applyLevel(
+				PauseOverlay.popup(
+					frame, gameworld.getLevelUpOptions().get(0), 
+					gameworld.getLevelUpOptions().get(1),
+					gameworld.isActiveLevelUp()
+				));
+			gameworld.awaitingLevel = false;
+			framerate.setRepeats(true);
+			framerate.start();
+			return;
+		}
 		gameworld.gamelogic();
 		canvas.updateview();  
 		frame.setTitle("Ever wonder why it's called 'Risk of Rain' when there is no rain?");  
+		if (framesLeft > 0) framesLeft--;
+		if (framesLeft == 0 || !playing) framerate.setRepeats(false);
 	}
 
 	public static void win() {playing = false;}

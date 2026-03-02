@@ -40,7 +40,6 @@ public class GameIO {
             FileReader actives = new FileReader("res/actives.csv");
             activeIDsByKey.put('q', new ArrayList<>());
             activeIDsByKey.put('e', new ArrayList<>());
-            activeIDsByKey.put('r', new ArrayList<>());
 
             // Passive parsing
             try (BufferedReader br = new BufferedReader(passives)) {
@@ -97,8 +96,8 @@ public class GameIO {
 
     public String getActiveTitle(int ID) {return activeTitles.get(ID);}
 
-    public String getActiveDescrition(int ID) {return activeDescriptions.get(ID);}
+    public String getActiveDescription(int ID) {return activeDescriptions.get(ID);}
 
-    public List<Integer> getActiveIDsByKey(Character key) {return activeIDsByKey.get(key);}
+    public List<Integer> getActiveIDsByKey(char key) {return activeIDsByKey.get(key);}
 
 }

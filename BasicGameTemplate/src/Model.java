@@ -1,5 +1,7 @@
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import util.GameIO;
 import util.GameObject;
 import util.Vector3f; 
 /*
@@ -34,12 +36,15 @@ public class Model {
 	private int stageLevel = 1;
 	private PhysicalGameObject portal;
 	public boolean renderPortal = false;
-	private boolean gameOver = false;
+	public boolean awaitingLevel = false;
+	public boolean gameOver = false;
 	
 	// Player variables
+	private GameIO io = GameIO.getInstance();
 	private final Player player = Player.getPlayer();
 	private int pIFrames = 0;
 	private int pCooldown = 0;
+	private List<Integer> currentLevelOptions = new CopyOnWriteArrayList<>();
 
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
@@ -102,7 +107,10 @@ public class Model {
 			if (!renderPortal) {
 				portal = currentStage.spawnPortal();
 				renderPortal = true;
-				// prompt level-up
+				// Pick out two options for levels
+				chooseLevelUpOptions();
+				awaitingLevel = true;
+				
 			}
 			if (collisionDetector(player, portal).length() != 0) {
 				stageLevel++;
@@ -268,6 +276,28 @@ public class Model {
 		}
 	}
 
+	public void chooseLevelUpOptions() {
+		currentLevelOptions.clear();
+		List<Integer> ids;
+		switch(stageLevel) {
+			case 2: {ids = io.getActiveIDsByKey('q');break;}
+			case 4: {ids = io.getActiveIDsByKey('e');break;}
+			default: {ids = io.getPassiveIDs();}
+		}
+
+		Collections.shuffle(ids);
+		currentLevelOptions.add(ids.get(0));
+		currentLevelOptions.add(ids.get(1));
+	}
+
+	public void applyLevel(int id) {
+		if (stageLevel % 2 != 0) {
+			player.passive(id);
+		} else {
+			player.active(id);
+		}
+	}
+
 	public Player getPlayer() {return player;}
 
 	public PhysicalGameObject getPortal() {return portal;}
@@ -282,8 +312,10 @@ public class Model {
 
 	public String getBackground() {return currentStage.getBackground();}
 
+	public List<Integer> getLevelUpOptions() {return currentLevelOptions;}
+	
+	public boolean isActiveLevelUp() {return (stageLevel % 2 == 0);}
 }
-
 
 /* MODEL OF your GAME world 
  * MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
