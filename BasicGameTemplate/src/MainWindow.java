@@ -21,8 +21,7 @@ public class MainWindow {
 	 private static Timer framerate;
 	 private KeyListener controller = Controller.getInstance();
 	 private MouseListener mouse = Mouse.getInstance();
-	 private static final int TARGET_FPS = 60;
-	 private static boolean startGame= false; 
+	 private static final int MS_FRAME_DELAY = 8;
 	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
 	 private static int framesLeft = -1;
@@ -47,7 +46,7 @@ public class MainWindow {
 					canvas.addKeyListener(controller);    //adding the controller to the Canvas 
 					canvas.addMouseListener(mouse); 
 	            	canvas.requestFocusInWindow();   // making sure that the Canvas is in focus so keyboard input will be taking in .
-					startGame=true;
+					framerate.start();
 				}
 			});  
 		
@@ -78,13 +77,11 @@ public class MainWindow {
 		};
 
 		// It's a lot simpler and more reliable to use java swing timer instead of a while loop.
-		framerate = new Timer(8, nextGameTick);
-		if (playing) {
-			framerate.start();
-		}
+		framerate = new Timer(MS_FRAME_DELAY, nextGameTick);
 	} 
 	//Basic Model-View-Controller pattern 
 	private static void gameloop() { 
+		// Handles level-up
 		if (gameworld.awaitingLevel) {
 			framerate.setRepeats(false);
 			gameworld.applyLevel(

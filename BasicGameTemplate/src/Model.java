@@ -1,5 +1,7 @@
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import util.GameIO;
 import util.GameObject;
@@ -31,24 +33,26 @@ SOFTWARE.
 public class Model {
 
 	// World variables
-	private final  CopyOnWriteArrayList<Attack> bulletList  = new CopyOnWriteArrayList<>();
-	private Stage currentStage = new Stage(2);
+	private final CopyOnWriteArrayList<Attack> bulletList  = new CopyOnWriteArrayList<>();
+	private Stage currentStage = new Stage(3);
 	private int stageLevel = 1;
 	private PhysicalGameObject portal;
+	private final Random coordinator = new Random();
 	public boolean renderPortal = false;
 	public boolean awaitingLevel = false;
 	public boolean gameOver = false;
 	
 	// Player variables
-	private GameIO io = GameIO.getInstance();
+	private final GameIO io = GameIO.getInstance();
 	private final Player player = Player.getPlayer();
 	private int pIFrames = 0;
 	private int pCooldown = 0;
-	private List<Integer> currentLevelOptions = new CopyOnWriteArrayList<>();
+	private final List<Integer> currentLevelOptions = new ArrayList<>();
 
 	// Enemy variables
 	private final CopyOnWriteArrayList<Enemy> EnemiesList  = new CopyOnWriteArrayList<>();
 	private float credits = 0f;
+	private int wizards = 0;		// We only really want two wizards at most. More than that gets oppresive FAST
 	private int mobCap = (int)(currentStage.getDifficulty() * 100f);
 
 	// Controllers
@@ -76,14 +80,15 @@ public class Model {
 
 	private void gameLogic() { 
 		if (gameOver) return;
-		// Enemy hitting
 		for (Enemy enemy : EnemiesList) {
+			// Enemy hitting
 			for (Attack bullet : bulletList) {
-				if (collisionDetector(enemy, bullet).length() != 0 && bullet.isPlayerMade()) {
+				if (bullet.isPlayerMade() && collisionDetector(enemy, bullet).length() != 0) {
 					enemy.damage(bullet.getDamage());
 					if (enemy.hp() <= 0) {
 						player.level(enemy.getEnemyType());
 						EnemiesList.remove(enemy);
+						if (enemy.getEnemyType() == 3) wizards--;
 					}
 					bulletList.remove(bullet);
 				}  
@@ -110,7 +115,6 @@ public class Model {
 				// Pick out two options for levels
 				chooseLevelUpOptions();
 				awaitingLevel = true;
-				
 			}
 			if (collisionDetector(player, portal).length() != 0) {
 				stageLevel++;
@@ -125,16 +129,28 @@ public class Model {
 		// Add credits per frame and spawn new enemies.
 		mobCap = currentStage.getMobCap();
 		if (credits < mobCap * 2) credits += currentStage.getDifficulty();
-		while (credits >= 1 && EnemiesList.size() < mobCap && player.getXP() < currentStage.getBounty()) {
-			System.out.println(player.getXP() + "\t" + currentStage.getBounty());
-			EnemiesList.add(new Enemy(currentStage.randomEnemy(), player));
-			credits--;
+		if (credits > 1 && EnemiesList.size() < mobCap && player.getXP() < currentStage.getBounty()) {
+			Enemy newEnemy = new Enemy(currentStage.randomEnemy(), player);
+			// coordinator just helps to make spawns happen less immediately.
+			if (credits >= newEnemy.getEnemyType() && coordinator.nextInt(6) == 0) {
+				if (newEnemy.getEnemyType() == 3) {
+					//newEnemy = new Enemy(player, wizards);
+					if (wizards < 2) {
+						EnemiesList.add(newEnemy);
+						credits -= newEnemy.getEnemyType();
+						wizards++;
+					}
+				} else {
+					EnemiesList.add(newEnemy);
+					credits -= newEnemy.getEnemyType();
+				}
+			}
 		}
 
 		for (Enemy bad : EnemiesList) 
 		{
 		    // Move enemies 
-			bad.step();
+			bad.step(bulletList);
 			for (GameObject plat : currentStage.platformList()) {
 				Vector3f collisionVector = collisionDetector(plat, bad);
 				if (collisionVector.length() != 0 && bad.getEnemyType() != 2) {	// We ignore the bats for collision
@@ -161,6 +177,11 @@ public class Model {
 				if (collisionVector.length() != 0) {
 					bulletList.remove(temp);
 				}
+			}
+			// Collision with player if made by enemy
+			if (!temp.isPlayerMade() && collisionDetector(temp, player).length() > 0) {
+				player.damage(temp.getDamage());
+				bulletList.remove(temp);
 			}
 		} 
 		

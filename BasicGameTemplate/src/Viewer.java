@@ -42,6 +42,7 @@ public class Viewer extends JPanel {
 	private Image blank;
 	private Image playerSprites;
 	private Image playerBullet;
+	private Image enemyBullet;
 	private Image background;
 	private HashMap<String, Image> objectSprites = new HashMap<>();
 	private HashMap<String, Image> enemySprites = new HashMap<>();
@@ -52,11 +53,13 @@ public class Viewer extends JPanel {
 		File blankTexture = new File("res/blankSprite.png");
 		File playerTexture = new File(gameworld.getPlayer().getTexture()); 
 		File pBulTexture = new File("res/player/Moving.png");
+		File eBulTexture = new File("res/enemies/grim_projectile.png");
 		File bgTexture = new File(gameworld.getBackground());
 		try {
 			blank = ImageIO.read(blankTexture);
 			playerSprites = ImageIO.read(playerTexture); 
 			playerBullet = ImageIO.read(pBulTexture);
+			enemyBullet = ImageIO.read(eBulTexture);
 			background = ImageIO.read(bgTexture);
 
 		} catch (IOException e) {
@@ -140,7 +143,8 @@ public class Viewer extends JPanel {
 		int yAnim = e.getVerticalFrame() * e.getSpriteStepVertical() + e.getSpriteStartVertical();
 		int x = (int) e.getCentre().getX();
 		int y = (int) e.getCentre().getY();
-		// Draws enemy hitboxes -> g.drawImage(blank, x, y, x+e.getWidth(), y+e.getHeight(), 0, 0, 16, 16, null);
+		// Draws enemy hitboxes -> 
+		// g.drawImage(blank, x, y, x+e.getWidth(), y+e.getHeight(), 0, 0, 16, 16, null);
 		g.drawImage(enemySprites.get(e.getTexture()), x, y, x+e.getWidth(), y+e.getHeight(), xAnim  , yAnim, xAnim + e.getSpriteWidth(), yAnim + e.getSpriteHeight(), null); 
 
 
@@ -158,6 +162,8 @@ public class Viewer extends JPanel {
 			int animationStep = (int) (currentAnimationTime / 6) % 4;	// Steps every 6 frames
 			int xAnim, xOffset;
 			if (a.getMovementVector().getX() > 0) {
+				// These numbers (50 & 7 & 37) are hardcoded as attributes of the animation sprite. 
+				// Doing these as built in details on Attack would be better (like is done in Player and Enemy) but I frankly dont have the time to do the better way
 				xAnim = animationStep * 50 + 7;
 				xOffset = 30;
 			} else {
@@ -167,6 +173,20 @@ public class Viewer extends JPanel {
 			int x = (int) a.getCentre().getX();
 			int y = (int) a.getCentre().getY();
 			g.drawImage(playerBullet, x, y, x + a.getWidth(), y + a.getHeight(), xAnim, 20, xAnim + xOffset, 33, null); 
+		} else {
+			int animationStep = (int) (currentAnimationTime / 6) % 6;	// Steps every 6 frames (but with 6 possible animation frames)
+			int xAnim, xOffset;
+			if (a.getMovementVector().getX() > 0) {
+				// See above this section in the playermade bullets to see where these numbers come from
+				xAnim = animationStep * 64 + 13;
+				xOffset = 30;
+			} else {
+				xAnim = animationStep * 64 + 43;
+				xOffset = -30;
+			}
+			int x = (int) a.getCentre().getX();
+			int y = (int) a.getCentre().getY();
+			g.drawImage(enemyBullet, x, y, x + a.getWidth(), y + a.getHeight(), xAnim, 19, xAnim + xOffset, 29, null); 
 		}
 	}
 	

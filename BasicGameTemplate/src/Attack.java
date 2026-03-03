@@ -21,15 +21,18 @@ public class Attack extends GameObject{
     // Needs to store gameobject to follow, or vector to move. Not both.
     // Needs all the basic gameobject things as well.
     // The two types of attacks implemented here + adding a default to whether the object is player made makes overloading the constructor quite a lot of code
-    public Attack(String textureLocation,int width,int height,GameObject follow, Point3f offset, int duration, boolean playerMade, float damage) {
-        super(textureLocation, width, height, follow.getCentre().add(offset));
-        following = follow;
-        this.offset = offset;
-        this.duration = duration;
-        this.playerMade = playerMade;
-        this.damage=damage;
-    }
 
+    /**
+     * Creates a new attack that originates at start and moves following movement
+     * @param textureLocation String
+     * @param width int
+     * @param height int
+     * @param start Point3f
+     * @param movement Vector3f
+     * @param duration int
+     * @param playerMade boolean
+     * @param damage float
+     */
     public Attack(String textureLocation,int width,int height,Point3f start,Vector3f movement, int duration, boolean playerMade, float damage) {
         super(textureLocation, width, height, start);
         movementVector = movement;
@@ -38,9 +41,17 @@ public class Attack extends GameObject{
         this.damage=damage;
     }
 
-    public Attack(String textureLocation,int width,int height,GameObject follow, Point3f offset, int duration, float damage) {
-        this(textureLocation, width, height, follow, offset, duration, false, damage);
-    }
+    /**
+     * Creates a new attack that originates at start and moves following movement
+     * Assuming enemy-made constructor, add boolean for whether it is made by a player after int duration
+     * @param textureLocation String
+     * @param width int
+     * @param height int
+     * @param start Point3f
+     * @param movement Vector3f
+     * @param duration int
+     * @param damage float
+     */
     public Attack(String textureLocation,int width,int height,Point3f start,Vector3f movement, int duration, float damage) {
         this(textureLocation, width, height, start, movement, duration, false, damage);
     }

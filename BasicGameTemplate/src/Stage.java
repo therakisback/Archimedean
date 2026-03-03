@@ -20,8 +20,9 @@ public class Stage {
 
     public Stage(int progression) {
         switch (progression) {
-			case 1: stageOne();
-			case 2: stageTwo();
+			case 2: stageTwo();break;
+			case 3: stageThree();break;
+			default:stageOne();
 		}
     }
     
@@ -33,16 +34,16 @@ public class Stage {
 		potentialEnemies.add(1);
 		difficulty = 0.015f;
 		mobCap = 3;
-		bounty = 10;
+		bounty = 8;
 
 		// Player
-		playerSpawn = new Point3f(300, 725, 0);
+		playerSpawn = new Point3f(750, 725, 0);
 		portalSpawn = new Point3f(900, 458, 0);
 
 		// Floor
 		platforms.clear();
 		int position = 0;
-		platforms.add(new PhysicalGameObject(2, new Point3f(0, 936, 0)));
+		platforms.add(new PhysicalGameObject(2, new Point3f(position, 936, 0)));
 		position += platforms.get(0).getWidth();
 		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
 		position += platforms.get(1).getWidth();
@@ -91,15 +92,116 @@ public class Stage {
 
 		// Decorations
 		decorations.clear();
-		decorations.add(new PhysicalGameObject(4, new Point3f(600,1024-64-(144*4),0)));
+		decorations.add(new PhysicalGameObject(4, new Point3f(900,1024-64-(144*4),0)));
 
 		
 	}
 
 	private void stageTwo() {
-		stageOne();
+		background = "res/environment/bg2.png";
+
+		// Enemies
 		potentialEnemies.clear();
 		potentialEnemies.add(2);
+		difficulty = 1f;
+		mobCap = 5;
+		bounty = 12;
+
+		// Player
+		playerSpawn = new Point3f(900, 458, 0);
+		portalSpawn = new Point3f(700, 808, 0);
+
+		// Floor
+		platforms.clear();
+		int position = 0;
+		platforms.add(new PhysicalGameObject(2, new Point3f(position, 936, 0)));
+		position += platforms.get(0).getWidth();
+		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
+		position += platforms.get(1).getWidth();
+		platforms.add(new PhysicalGameObject(1, new Point3f(position, 936, 0)));
+		position += platforms.get(2).getWidth();
+		platforms.add(new PhysicalGameObject(2, new Point3f(position, 936, 0)));
+		position += platforms.get(3).getWidth();
+		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
+
+		// Platforms
+		position = 200;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+
+		position = 400;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+
+		position = 200;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 508, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 508, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 508, 0)));
+
+		position = 1300;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 808, 0)));
+
+		position = 1100;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 658, 0)));
+
+		position = 1300;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 508, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 508, 0)));
+		position += 64;
+		platforms.add(new PhysicalGameObject(0, new Point3f(position, 508, 0)));
+
+		// Decorations
+		decorations.clear();
+		decorations.add(new PhysicalGameObject(4, new Point3f(550,1024-64-(144*4),0)));
+	}
+
+	private void stageThree() {
+		background = "res/environment/bg3.png";
+		potentialEnemies.clear();
+		// We can influence weighting of enemy spawns by adjusting this list
+		potentialEnemies.add(3);
+		potentialEnemies.add(3);
+		potentialEnemies.add(3);
+		potentialEnemies.add(3);
+		potentialEnemies.add(1);
+		difficulty = 0.05f;
+		mobCap = 4;
+		bounty = 20;
+
+		playerSpawn = new Point3f(900, 458, 0);
+		portalSpawn = new Point3f(700, 808, 0);
+
+		// Floor
+		platforms.clear();
+		int position = 0;
+		platforms.add(new PhysicalGameObject(2, new Point3f(position, 936, 0)));
+		position += platforms.get(0).getWidth();
+		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
+		position += platforms.get(1).getWidth();
+		platforms.add(new PhysicalGameObject(1, new Point3f(position, 936, 0)));
+		position += platforms.get(2).getWidth();
+		platforms.add(new PhysicalGameObject(2, new Point3f(position, 936, 0)));
+		position += platforms.get(3).getWidth();
+		platforms.add(new PhysicalGameObject(3, new Point3f(position, 936, 0)));
+
+		// Platforms
 	}
 
 	public PhysicalGameObject spawnPortal() {return new PhysicalGameObject(6, portalSpawn);}
@@ -108,7 +210,7 @@ public class Stage {
 
 	public List<PhysicalGameObject> decorationList() {return decorations;}
 
-	public int randomEnemy() {return potentialEnemies.get(rand.nextInt(potentialEnemies.size())) + 1;}
+	public int randomEnemy() {return potentialEnemies.get(rand.nextInt(potentialEnemies.size()));}
 
     public String getBackground() {return background;}
 

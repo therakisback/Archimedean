@@ -41,7 +41,7 @@ public class Player extends GameObject {
     private int attackSpeed = 3;
     private int playerWidth = 30;
     private int playerHeight = 100;
-    private int iFrames = 30;    // TODO could be modified by upgrades
+    private int iFrames = 100;    // TODO could be modified by upgrades
     private boolean hasDiceUpgrade = false;
     // Player stats
     private int firstAbility = 0;
@@ -110,7 +110,6 @@ public class Player extends GameObject {
     public void bonk() {if (airtime > JUMP_SPEED) airtime = (int) JUMP_SPEED;}
 
     // --- Attacks ---
-
     public Attack fire() {
         Point3f spawn = this.getCentre().add(new Point3f(32, 0, 0));
         Vector3f movement = new Vector3f(facing * 20, 0, 0);
@@ -129,7 +128,7 @@ public class Player extends GameObject {
         experience += xp * xpMult;
     }
 
-    // Abilities
+    // --- Upgrades ---
         // Passives
     private float rtd() {
         return diceGen.nextFloat() * damage;
@@ -143,7 +142,7 @@ public class Player extends GameObject {
     }
 
     public void flight(){
-        // TODO Implement passives
+        // TODO Implement actives
     }
 
     public void passive(int passiveID) {
@@ -166,6 +165,7 @@ public class Player extends GameObject {
         hp = maxHealth;
         this.setWidth(playerWidth);
         this.setHeight(playerHeight);
+        experience = 0;
     }
 
     public void active(int activeID) {
@@ -175,6 +175,7 @@ public class Player extends GameObject {
             case 'e': {secondAbility = activeID;}
             default: {}
         }
+        experience = 0;
     }
 
     // --- Animations ---
@@ -218,7 +219,7 @@ public class Player extends GameObject {
             case 5: {   // hit
                 frames = 3;
                 verticalFrame = 5;
-                animationRate = 11;
+                animationRate = iFrames/3;
                 break;
             }
             case 6: {   // die

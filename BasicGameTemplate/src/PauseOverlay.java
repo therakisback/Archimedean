@@ -50,10 +50,14 @@ public class PauseOverlay {
         panel.add(btn1);
         panel.add(btn2);
         dialog.add(panel);
+        // This prevents bugs where the player presses "X" and then gets stuck
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);   
+        dialog.setUndecorated(true);
 
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
+        
 
         return choice[0];
     }

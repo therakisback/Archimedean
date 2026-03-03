@@ -1,4 +1,5 @@
 
+import java.util.List;
 import java.util.Random;
 import util.GameObject;
 import util.Point3f;
@@ -21,8 +22,9 @@ public class Enemy extends GameObject {
     private float moveSpeed;
     private float acceleration;
     private float damage;
-    private float attackCooldown = 0;
-    private float health;
+    private int maxCooldown;
+    private int attackCooldown = 0;
+    private float health = 1;
     private int airtime = 0;
     private int enemyType = 0; 
     private boolean onGround;
@@ -42,15 +44,24 @@ public class Enemy extends GameObject {
 
     public Enemy(int enemyType, GameObject player) {
         // I hate that java v<25 doesn't allow flexible constructor bodies. This is a bandaid to a feature that should've been implemented LONG ago.
-        super("res/enemies/Sword.png", 75, 75, new Point3f(-1000, -1000, 0));
+        super("res/enemies/sword.png", 75, 75, new Point3f(-1000, -1000, 0));
         if (enemyType == 0) enemyType = 1;
         this.player = player;
         this.enemyType = enemyType;
         switch (enemyType) {
             case 2: {   // Bats
                 super.textureLocation = "res/enemies/bat_angry_fangs.png";
-                int spawnX = random.nextInt(3) * 760;
-                spawn = new Point3f(spawnX, 100, 0);
+                int spawnX;
+                int spawnY;
+                if (random.nextBoolean()) {
+                    spawnX = random.nextInt(1600);
+                    spawnY = 0;
+                } else {
+                    spawnX = random.nextBoolean() ?  0 : 1600;
+                    spawnY = random.nextInt(500);
+                }
+
+                spawn = new Point3f(spawnX, spawnY, 0);
                 super.setCentre(spawn);
                 target = player.getCentre();
                 damage = 1;
@@ -70,6 +81,31 @@ public class Enemy extends GameObject {
                 break;
             }
             case 3: {   // Wizard?
+                super.textureLocation = "res/enemies/grim_summon.png";
+                int spawnX = random.nextBoolean() ?  200 : 1400;
+                spawn = new Point3f(spawnX, 908, 0);
+                super.setCentre(spawn);
+                target = player.getCentre();
+                damage = 0;
+                moveSpeed = 0;
+                acceleration = 0f;
+                health = 1;
+                width = 100;
+                height = 100;
+                maxCooldown = 25 * 6;    // 25 frames at 6 frames per tick till the animation ends.
+                attackCooldown = maxCooldown;
+
+                frames = 25;
+                spriteWidth = 56;
+                spriteHeight = 54;
+                spriteStartHorizontal = 4;
+                spriteStartVertical = 10;
+                spriteStepHorizontal = 64;
+                spriteStepVertical = 0; 
+                break;
+
+            }
+            case 4: {   // Boss?
 
             }
             default: {  // Sword
@@ -95,10 +131,40 @@ public class Enemy extends GameObject {
     }
 
     /**
+     * Overloaded constructor for specifically calling wizards that dont spawn in the same spot. It's not a great way to do it but it keeps
+     * all enemy spawns the same except for the one that needs to change.
+     * @param player
+     * @param wizardNum
+     */
+    public Enemy(GameObject player, int wizardNum) {
+        super("res/enemies/grim_summon.png", 100, 100, new Point3f(-1000, -1000, 0));
+        enemyType = 3;
+        this.player = player;
+        int spawnX = (wizardNum == 1) ?  200 : 1400;
+        spawn = new Point3f(spawnX, 908, 0);
+        super.setCentre(spawn);
+        target = player.getCentre();
+        damage = 0;
+        moveSpeed = 0;
+        acceleration = 0f;
+        health = 1;
+        maxCooldown = 25 * 6;
+        attackCooldown = maxCooldown;
+
+        frames = 25;
+        spriteWidth = 56;
+        spriteHeight = 54;
+        spriteStartHorizontal = 4;
+        spriteStartVertical = 10;
+        spriteStepHorizontal = 64;
+        spriteStepVertical = 0; 
+    }
+
+    /**
      * Does one frame of movement / calculation for an enemy
      * @return amount of damage to be dealt to the player/
      */
-    public void step() {
+    public void step(List<Attack> bullets) {
         switch(enemyType) {
             case 2: {   // Bats
                 // Movement - very simple as they dont need gravity, or ground
@@ -110,6 +176,21 @@ public class Enemy extends GameObject {
                 }
                 break;
             }
+            case 3: {
+                if (attackCooldown == 0) {
+                    target = player.getCentre();
+                    Vector3f path = target.MinusPoint(centre).Normal(5);
+                    path.setY(-path.getY());
+                    Point3f spawn = new Point3f(centre.getX() + width/2, centre.getY(), 0);
+                    Attack shot = new Attack("res/enemies/grim_projectile.png", 45, 15, spawn, path, 999, 2);
+                    bullets.add(shot);
+                    attackCooldown = maxCooldown;
+                } else {
+                    attackCooldown--;
+                }
+                break;
+            }
+
             default: {  // Swords
                 // Movement
                 target = player.getCentre();
@@ -167,7 +248,11 @@ public class Enemy extends GameObject {
 
     public float getDamage() {return damage;}
 
-    public float damage(float dealt) {health -= damage;return health;}
+    public float damage(float dealt) {
+        health -= dealt;
+        System.out.println("Damage taken by Enemy: " + dealt + " Current enemy health: " + health);
+        return health;
+    }
 
     public float hp() {return health;}
 
