@@ -34,17 +34,17 @@ public class Model {
 
 	// World variables
 	private final CopyOnWriteArrayList<Attack> bulletList  = new CopyOnWriteArrayList<>();
-	private Stage currentStage = new Stage(3);
+	private Stage currentStage = new Stage(1);
 	private int stageLevel = 1;
 	private PhysicalGameObject portal;
 	private final Random coordinator = new Random();
 	public boolean renderPortal = false;
 	public boolean awaitingLevel = false;
-	public boolean gameOver = false;
+	public boolean gameOver;
 	
 	// Player variables
 	private final GameIO io = GameIO.getInstance();
-	private final Player player = Player.getPlayer();
+	private final Player player = new Player();
 	private int pIFrames = 0;
 	private int pCooldown = 0;
 	private final List<Integer> currentLevelOptions = new ArrayList<>();
@@ -61,6 +61,7 @@ public class Model {
 
 	
 	public Model() {
+		gameOver = false;
 		player.setCentre(currentStage.getPlayerSpawn() );
 }
 	
@@ -88,7 +89,6 @@ public class Model {
 					if (enemy.hp() <= 0) {
 						player.level(enemy.getEnemyType());
 						EnemiesList.remove(enemy);
-						if (enemy.getEnemyType() == 3) wizards--;
 					}
 					bulletList.remove(bullet);
 				}  
@@ -109,6 +109,7 @@ public class Model {
 
 		// If player reaches the bounty, spawn the portal and prompt level-up once every mob is dead
 		if (player.getXP() > currentStage.getBounty() && EnemiesList.isEmpty()) {
+			if (stageLevel == 6) {MainWindow.win();System.out.println("Player won");}
 			if (!renderPortal) {
 				portal = currentStage.spawnPortal();
 				renderPortal = true;
@@ -117,6 +118,9 @@ public class Model {
 				awaitingLevel = true;
 			}
 			if (collisionDetector(player, portal).length() != 0) {
+				player.resetXP();
+				wizards = 0;
+				credits = 0f;
 				stageLevel++;
 				currentStage = new Stage(stageLevel);
 				player.setCentre(currentStage.getPlayerSpawn());
@@ -132,9 +136,9 @@ public class Model {
 		if (credits > 1 && EnemiesList.size() < mobCap && player.getXP() < currentStage.getBounty()) {
 			Enemy newEnemy = new Enemy(currentStage.randomEnemy(), player);
 			// coordinator just helps to make spawns happen less immediately.
-			if (credits >= newEnemy.getEnemyType() && coordinator.nextInt(6) == 0) {
+			if (credits >= newEnemy.getEnemyType() && coordinator.nextInt(10) == 0) {
 				if (newEnemy.getEnemyType() == 3) {
-					//newEnemy = new Enemy(player, wizards);
+					newEnemy = new Enemy(player, wizards);
 					if (wizards < 2) {
 						EnemiesList.add(newEnemy);
 						credits -= newEnemy.getEnemyType();
@@ -171,16 +175,16 @@ public class Model {
 			if (temp.getCentre().getX() == 0.0) bulletList.remove(temp);
 			// TODO Inconsitent if screen shape is changed
 			if (temp.getCentre().getX() >= 1550) bulletList.remove(temp);
-			// Collision with platforms
-			for (GameObject plat : currentStage.platformList()) {
-				Vector3f collisionVector = collisionDetector(plat, temp);
-				if (collisionVector.length() != 0) {
-					bulletList.remove(temp);
-				}
-			}
+			// Initially bullets had collisions with platforms, but this didnt feel fun.
 			// Collision with player if made by enemy
 			if (!temp.isPlayerMade() && collisionDetector(temp, player).length() > 0) {
-				player.damage(temp.getDamage());
+				if (pIFrames <= 0) {
+					if (player.damage(temp.getDamage()) <= 0.1f) {
+						MainWindow.lose();
+						gameOver = true;
+						System.out.println("Player damaged! HP remaining: " + player.damage(0));
+					}
+				}
 				bulletList.remove(temp);
 			}
 		} 
@@ -198,10 +202,11 @@ public class Model {
 			return;
 		}
 
+		// --- Vertical Movement ---
+
 		if(Controller.getInstance().isKeyWPressed())
 		{
 			playerVelocity.Plus(player.jump());
-			player.changeAnimation(2);
 		} else {
 			playerVelocity.Plus(player.fall());
 		}
@@ -218,34 +223,41 @@ public class Model {
 				falling = false;
 			} else if (collisionVector.getY() < 0) player.bonk();
 		}
-		// falling animation
-		if (falling && playerVelocity.getY() < 0) player.changeAnimation(3);
 
 		// Reset vector for horizontal movement
 		playerVelocity = new Vector3f();
 
-		
-		if(mouse.isLMBPressed() && player.isOnGround()) {
-			if (pCooldown == 0 && !falling) {
+		// --- Animations, Shooting, & Horizontal movement ---
+		// Initially the player couldn't shoot unless they were on the ground, it felt wrong
+		// The animation doesn't fit perfectly, but it is unfair if the player cant jump and shoot
+		if(mouse.isLMBPressed()) {
+			if(pCooldown == 0) {
 				bulletList.add(player.fire());
 				pCooldown =  (int) (60 / player.attackSpeed());
 			}
-			if (!falling && pIFrames == 0) player.changeAnimation(4);
+			if(pIFrames == 0) player.changeAnimation(4);
 		} 
-		else if (pCooldown > 0) {
-			if (!falling && pIFrames == 0) player.changeAnimation(4);
+		else if(pCooldown > 0 && pIFrames == 0 ) {
+			player.changeAnimation(4);
 		}
 		else if(Controller.getInstance().isKeyAPressed()) {
 			playerVelocity.Plus(player.moveLeft());
+			// If jumping, that animation takes priority
 			if (!falling && pIFrames == 0) player.changeAnimation(1);
 		} 
 		else if(Controller.getInstance().isKeyDPressed()) {
 			playerVelocity.Plus(player.moveRight());
 			if (!falling && pIFrames == 0) player.changeAnimation(1);
 		} 
-		else if (!falling && player.isOnGround() && pIFrames == 0) {
+		else if(!falling && player.isOnGround() && pIFrames == 0) {
 			// If we aren't jumping, falling, moving, shooting,or getting hit: we idle
 			player.changeAnimation(0);
+		}
+
+		if (Controller.getInstance().isKeyWPressed() && pIFrames == 0) {
+			player.changeAnimation(2);
+		} else if (falling && pIFrames == 0) {
+			player.changeAnimation(3);
 		}
 
 		if(controller.isKeyQPressed()) {
@@ -257,7 +269,6 @@ public class Model {
 		}
 
 		player.getCentre().ApplyVector(playerVelocity);
-		if (!falling && playerVelocity.getX() == 0f) 
 
 		if (pCooldown > 0) pCooldown--;
 		if (pIFrames > 0) player.changeAnimation(5);	// Hit animation
@@ -285,7 +296,7 @@ public class Model {
 		if (distance.getY() >= 0) {yVio = Math.abs(distance.getY())-obj1.getHeight();}
 		else {yVio = Math.abs(distance.getY()) - obj2.getHeight();}
 
-		if (yVio < 0f && xVio < 0f) {
+		if (yVio < 0.1f && xVio < 0.1f) {
 			// We want to push the player in the direction of the nearest edge. with a preference for moving up.
 			if (yVio >= xVio-4) {
 				return new Vector3f(0, yVio * direction.getY(), 0);
@@ -301,22 +312,24 @@ public class Model {
 		currentLevelOptions.clear();
 		List<Integer> ids;
 		switch(stageLevel) {
-			case 2: {ids = io.getActiveIDsByKey('q');break;}
-			case 4: {ids = io.getActiveIDsByKey('e');break;}
+			//case 2: {ids = io.getActiveIDsByKey('q');break;}
+			//case 4: {ids = io.getActiveIDsByKey('e');System.out.println(io.getActiveIDsByKey('e'));break;}
 			default: {ids = io.getPassiveIDs();}
 		}
 
 		Collections.shuffle(ids);
 		currentLevelOptions.add(ids.get(0));
 		currentLevelOptions.add(ids.get(1));
+		System.out.println(currentLevelOptions);
 	}
 
 	public void applyLevel(int id) {
-		if (stageLevel % 2 != 0) {
-			player.passive(id);
-		} else {
-			player.active(id);
-		}
+		player.passive(id);
+		// if (stageLevel % 2 != 0) {
+		// 	player.passive(id);
+		// } else {
+		// 	player.active(id);
+		// }
 	}
 
 	public Player getPlayer() {return player;}
@@ -335,7 +348,8 @@ public class Model {
 
 	public List<Integer> getLevelUpOptions() {return currentLevelOptions;}
 	
-	public boolean isActiveLevelUp() {return (stageLevel % 2 == 0);}
+	// Active level ups are not implemented yet
+	public boolean isActiveLevelUp() {return (false);}
 }
 
 /* MODEL OF your GAME world 

@@ -35,15 +35,16 @@ SOFTWARE.
  * Credits: Kelly Charles (2020)
  */ 
 public class Viewer extends JPanel {
-	private final int ANIMATION_STEP_RATE = 6;
+	private final int ANIMATION_STEP_RATE = 8;
 	private long currentAnimationTime= 0; 
 	
 	Model gameworld; 
 	private Image blank;
 	private Image playerSprites;
 	private Image playerBullet;
+	private Image healthBar;
 	private Image enemyBullet;
-	private Image background;
+	private HashMap<String, Image> backgrounds = new HashMap<>();
 	private HashMap<String, Image> objectSprites = new HashMap<>();
 	private HashMap<String, Image> enemySprites = new HashMap<>();
 	 
@@ -53,18 +54,21 @@ public class Viewer extends JPanel {
 		File blankTexture = new File("res/blankSprite.png");
 		File playerTexture = new File(gameworld.getPlayer().getTexture()); 
 		File pBulTexture = new File("res/player/Moving.png");
+		File hBarTexture = new File("res/player/health.png");
 		File eBulTexture = new File("res/enemies/grim_projectile.png");
-		File bgTexture = new File(gameworld.getBackground());
+		File firstBg = new File("res/environment/bg1.png");
 		try {
 			blank = ImageIO.read(blankTexture);
 			playerSprites = ImageIO.read(playerTexture); 
 			playerBullet = ImageIO.read(pBulTexture);
+			healthBar = ImageIO.read(hBarTexture);
 			enemyBullet = ImageIO.read(eBulTexture);
-			background = ImageIO.read(bgTexture);
+			//backgrounds.put("res/environment/bg1.png", ImageIO.read(firstBg));
 
 		} catch (IOException e) {
 			playerSprites = blank;
-			background = blank;
+			playerBullet = blank;
+			healthBar = blank;
 			e.printStackTrace();
 		} 
 	}
@@ -152,7 +156,15 @@ public class Viewer extends JPanel {
 
 	private void drawBackground(Graphics g)
 	{
-		g.drawImage(background, 0,0, 1600, 960, 0 , 0, 576, 324, null); 
+		if (!backgrounds.containsKey(gameworld.getBackground())) {
+			File bg = new File(gameworld.getBackground());
+			try {
+				backgrounds.put(gameworld.getBackground(), ImageIO.read(bg));
+			} catch (IOException err) {
+				backgrounds.put(gameworld.getBackground(), blank);
+			} 
+		}
+		g.drawImage(backgrounds.get(gameworld.getBackground()), 0,0, 1600, 960, 0 , 0, 576, 324, null); 
 	}
 	
 	private void drawBullet(Attack a, Graphics g)
@@ -202,6 +214,20 @@ public class Viewer extends JPanel {
 		int y2 = (int) p.getCentre().getY() + p.drawHeight - (p.drawHeight - p.getHeight());
 		// Draws player hitbox -> g.drawImage(blank, (int) p.getCentre().getX(), (int) p.getCentre().getY(), (int) p.getCentre().getX() + p.getWidth(), (int) p.getCentre().getY() + p.getHeight(), 0, 0, 15, 15, null);
 		g.drawImage(playerSprites, x, y, x2, y2, xAnim, yAnim, xAnim+p.spriteWidth, yAnim+p.spriteHeight, null); 
+
+		// Draw Health
+		int hpWidth = 70;
+		int position = 0;
+		for (int i = 0; i < p.getMaxHP(); i++) {
+			if (i < p.getHP()) {
+				// Drawing full hearts - 'magic numbers' come from health.png dimensions.
+				g.drawImage(healthBar, position, 0, position + hpWidth, hpWidth, 0, 0, 17, 16, null);
+			} else {
+				// Drawing empty hearts
+				g.drawImage(healthBar, position, 0, position + hpWidth, hpWidth, 17, 0, 34, 16, null);
+			}
+			position += hpWidth + 5;
+ 		}
 	}
 
 	private void drawPlatforms(PhysicalGameObject p, Graphics g) {

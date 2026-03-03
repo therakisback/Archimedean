@@ -14,7 +14,6 @@ import util.Vector3f;
  */
 public class Player extends GameObject {
 
-    private static final Player player = new Player();
     // Constants
     private final float GRAVITY_RATE = 8;
     private final float JUMP_SPEED = 8;
@@ -58,12 +57,8 @@ public class Player extends GameObject {
     // Cooldowns
     private int airtime = 0;
 
-    private Player() {
+    public Player() {
         super("res/player/Witch.png",30,100,new Point3f(0,0,0));
-    }
-
-    public static Player getPlayer() {
-        return player;
     }
 
     // --- Movement ---
@@ -111,16 +106,18 @@ public class Player extends GameObject {
 
     // --- Attacks ---
     public Attack fire() {
-        Point3f spawn = this.getCentre().add(new Point3f(32, 0, 0));
+        Point3f spawn = this.getCentre().add(new Point3f(32, height-80, 0));
         Vector3f movement = new Vector3f(facing * 20, 0, 0);
-        if(hasDiceUpgrade) {
-            // If the player hase 'Dice' we randomize the damage :)
-            return new Attack("res/player/Moving.png", attackWidth, attackHeight, spawn, movement, 
-                                attackDuration, true, rtd());
-        } else {
-            return new Attack("res/player/Moving.png", attackWidth, attackHeight, spawn, movement, 
-                                attackDuration, true, damage);
-        } 
+        return new Attack("res/player/Moving.png", attackWidth, attackHeight, spawn, movement, 
+                        attackDuration, true, damage * rtd());
+    }
+
+    public void useFirstAbility() {
+
+    }
+
+    public void useSecondAbility() {
+
     }
 
     // --- Levelling ---    - No longer used for gaining abilities
@@ -130,8 +127,15 @@ public class Player extends GameObject {
 
     // --- Upgrades ---
         // Passives
+    /**
+     * Rolls the proverbial dice if the player has the dice upgrade, otherwise returns 1
+     * Used to randomize a bunch of stuff like attack stats and incoming damage with the dice upgrade
+     * because gambling is a fun game mechanic (I mean really what else is a roguelike)
+     * @return
+     */
     private float rtd() {
-        return diceGen.nextFloat() * damage;
+        if (hasDiceUpgrade) return diceGen.nextFloat() * 2;
+        else return 1;
     }
         // Actives
     public void heal(int amount) {
@@ -160,12 +164,11 @@ public class Player extends GameObject {
         attackHeight *= mods.get(6);
         attackDuration *= mods.get(7);
         xpMult *= mods.get(8);
-        maxHealth *= mods.get(9);
+        maxHealth += mods.get(9);
         // Apply changes now
         hp = maxHealth;
         this.setWidth(playerWidth);
         this.setHeight(playerHeight);
-        experience = 0;
     }
 
     public void active(int activeID) {
@@ -175,7 +178,7 @@ public class Player extends GameObject {
             case 'e': {secondAbility = activeID;}
             default: {}
         }
-        experience = 0;
+        hp = maxHealth;
     }
 
     // --- Animations ---
@@ -256,15 +259,21 @@ public class Player extends GameObject {
 
     public void isOnGround(boolean val) {onGround = val;}
 
-    public float getDamage() {return damage;}
+    public float getDamage() {return damage * rtd();}
 
-    public float damage(float dealt) {hp -= dealt;return hp;}
+    public float damage(float dealt) {hp -= dealt * rtd();return hp;}
 
     public int getIFrames() {return iFrames;}
 
     public float attackSpeed() {return attackSpeed;}
 
     public float getXP() {return experience;}
+
+    public void resetXP() {experience = 0;}
+
+    public float getMaxHP() {return maxHealth;}
+
+    public float getHP() {return hp;}
 
     // --- Animation getters ---
 

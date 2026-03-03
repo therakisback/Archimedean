@@ -3,7 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
+import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -11,16 +11,17 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.Timer;
-import util.UnitTests;
 
 public class MainWindow {
-	 private static final JFrame frame = new JFrame("Game");   // Change to the name of your game 
-	 private static final Model gameworld= new Model();
-	 private static final Viewer canvas = new Viewer(gameworld);
+	 private static JFrame frame = new JFrame("Game");   // Change to the name of your game 
+	 private static Model gameworld= new Model();
+	 private static MainWindow hello;
+	 private static Viewer canvas = new Viewer(gameworld);
 	 private static Timer framerate;
-	 private KeyListener controller = Controller.getInstance();
-	 private MouseListener mouse = Mouse.getInstance();
+	 private static KeyListener controller = Controller.getInstance();
+	 private static MouseListener mouse = Mouse.getInstance();
 	 private static final int MS_FRAME_DELAY = 8;
 	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
@@ -50,14 +51,14 @@ public class MainWindow {
 				}
 			});  
 		
-	        startMenuButton.setBounds(400, 500, 200, 40); 
+	        startMenuButton.setBounds(700, 500, 200, 40); 
 	        
 	        //loading background image 
-	        File BackroundToLoad = new File("res/startscreen.png");  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
+	        File BackroundToLoad = new File("res/title_screen.png");  //should work okay on OSX and Linux but check if you have issues depending your eclipse install or if your running this without an IDE 
 			try {
-				BufferedImage myPicture = ImageIO.read(BackroundToLoad);
+				Image myPicture = ImageIO.read(BackroundToLoad).getScaledInstance(1600, 1000, java.awt.Image.SCALE_SMOOTH);
 				BackgroundImageForStartMenu = new JLabel(new ImageIcon(myPicture));
-				BackgroundImageForStartMenu.setBounds(0, 0, 1000, 1000);
+				BackgroundImageForStartMenu.setBounds(0, 0, 1600, 1000);
 				frame.add(BackgroundImageForStartMenu); 
 			}  catch (IOException e) { 
 				e.printStackTrace();
@@ -68,7 +69,7 @@ public class MainWindow {
 	}
 
 	public static void main(String[] args) {
-		MainWindow hello = new MainWindow();  //sets up environment 
+		hello = new MainWindow();  //sets up environment 
 		ActionListener nextGameTick = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
@@ -85,7 +86,7 @@ public class MainWindow {
 		if (gameworld.awaitingLevel) {
 			framerate.setRepeats(false);
 			gameworld.applyLevel(
-				PauseOverlay.popup(
+				PauseOverlay.levelPopup(
 					frame, gameworld.getLevelUpOptions().get(0), 
 					gameworld.getLevelUpOptions().get(1),
 					gameworld.isActiveLevelUp()
@@ -99,13 +100,43 @@ public class MainWindow {
 		canvas.updateview();  
 		frame.setTitle("Ever wonder why it's called 'Risk of Rain' when there is no rain?");  
 		if (framesLeft > 0) framesLeft--;
-		if (framesLeft == 0 || !playing) framerate.setRepeats(false);
+		if (framesLeft == 0) {
+			framerate.setRepeats(false);
+			if (PauseOverlay.lose(frame)) restart();
+		}
 	}
 
-	public static void win() {playing = false;}
+	public static void win() {
+		if (PauseOverlay.win(frame)) restart();
+	}
 
 	public static void lose() {
 		framesLeft = 120;
+	}
+
+	public static void restart() {
+		gameworld = new Model();
+		
+		// Re-create viewer
+		if (canvas != null) frame.remove(canvas);
+
+		canvas = new Viewer(gameworld);
+		canvas.setBounds(0, 0, 1600, 1024);
+		canvas.addKeyListener(controller);   
+		canvas.addMouseListener(mouse); 
+		canvas.setVisible(true);      
+
+		frame.getContentPane().removeAll();
+		frame.add(canvas);
+		canvas.requestFocusInWindow();
+		//frame.setTitle("Ever wonder why it's called 'Risk of Rain' when there is no rain?");
+		frame.revalidate();
+
+		// re-start game
+		playing = true;
+		framesLeft = -1;                      
+		framerate.setRepeats(true);
+		framerate.start();
 	}
 
 }

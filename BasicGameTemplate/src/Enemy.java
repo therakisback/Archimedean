@@ -116,7 +116,7 @@ public class Enemy extends GameObject {
                 damage = 1;
                 moveSpeed = 4;
                 acceleration = .1f;
-                health = 1;
+                health = 2;
                 
                 frames = 7;
                 spriteHeight = 22;
@@ -148,7 +148,7 @@ public class Enemy extends GameObject {
         moveSpeed = 0;
         acceleration = 0f;
         health = 1;
-        maxCooldown = 25 * 6;
+        maxCooldown = 25 * 8;
         attackCooldown = maxCooldown;
 
         frames = 25;
@@ -248,11 +248,7 @@ public class Enemy extends GameObject {
 
     public float getDamage() {return damage;}
 
-    public float damage(float dealt) {
-        health -= dealt;
-        System.out.println("Damage taken by Enemy: " + dealt + " Current enemy health: " + health);
-        return health;
-    }
+    public float damage(float dealt) {health -= dealt;return health;}
 
     public float hp() {return health;}
 
