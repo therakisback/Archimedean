@@ -99,7 +99,7 @@ public class Vector3f {
 
 	public Vector3f Normal()
 	{
-		float LengthOfTheVector=  this.length();
+		float LengthOfTheVector = this.length();
 		return this.byScalar(1.0f/ LengthOfTheVector); 
 	} 
 	

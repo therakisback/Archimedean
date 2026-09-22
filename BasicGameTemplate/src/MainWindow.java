@@ -6,6 +6,9 @@ import java.awt.event.MouseListener;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -22,7 +25,7 @@ public class MainWindow {
 	 private static Timer framerate;
 	 private static KeyListener controller = Controller.getInstance();
 	 private static MouseListener mouse = Mouse.getInstance();
-	 private static final int MS_FRAME_DELAY = 8;
+	 private static final int MS_FRAME_DELAY = 15;
 	 private JLabel BackgroundImageForStartMenu;
 	 private static boolean playing = true;
 	 private static int framesLeft = -1;

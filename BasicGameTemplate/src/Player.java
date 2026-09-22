@@ -40,7 +40,7 @@ public class Player extends GameObject {
     private int attackSpeed = 3;
     private int playerWidth = 30;
     private int playerHeight = 100;
-    private int iFrames = 100;    // TODO could be modified by upgrades
+    private final int iFrames = 100;    // TODO could be modified by upgrades
     private boolean hasDiceUpgrade = false;
     // Player stats
     private int firstAbility = 0;
